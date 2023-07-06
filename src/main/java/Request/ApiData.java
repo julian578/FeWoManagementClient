@@ -2,6 +2,7 @@ package Request;
 
 import Model.Booking;
 import Model.Client;
+import io.github.cdimascio.dotenv.Dotenv;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -58,8 +59,9 @@ public class ApiData {
     public static void loadClients(String jwt) throws JSONException, IOException {
         HashMap<String, Client> clients = new HashMap<>();
         clientList.clear();
+        Dotenv dotenv = Dotenv.configure().load();
         for(Booking b : bookingList) {
-            JSONObject client = new JSONObject(ApiRequests.getRequest(new URL("http://localhost:3000/api/booking/client/"+b.getClientId()), jwt).toString());
+            JSONObject client = new JSONObject(ApiRequests.getRequest(new URL(dotenv.get("API_REQUEST_PREFIX")+"/booking/client/"+b.getClientId()), jwt).toString());
             Client c = new Client(
                     (String)client.get("fullName"),
                     (String) client.get("email"),

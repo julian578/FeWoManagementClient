@@ -26,7 +26,7 @@ public class InvoiceLabel extends JPanel {
     private JLabel jlbName;
 
     private JLabel jlbDate;
-    private JLabel jlbInvoiceCreatedAndSent = new JLabel("Rechnung verschickt.");
+    private JLabel jlbInvoiceCreatedAndSent = new JLabel("Rechnung erstellt.");
 
     private JLabel jlbBookingNumber = new JLabel();
 
@@ -103,11 +103,8 @@ public class InvoiceLabel extends JPanel {
         if(invoiceStatus == 0) {
             jbtInvoice.setVisible(true);
         } else if(invoiceStatus == 1) {
-            jbtSendInvoice.setVisible(true);
-        } else {
             jlbInvoiceCreatedAndSent.setVisible(true);
         }
-
         this.setVisible(true);
 
     }

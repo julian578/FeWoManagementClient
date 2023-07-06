@@ -1,6 +1,7 @@
 package Frames;
 
 import Request.ApiRequests;
+import io.github.cdimascio.dotenv.Dotenv;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -52,6 +53,7 @@ public class LoginFrame extends JFrame {
         this.add(jtfPassword);
 
         jbtLogin.setBounds(280, 60, 80, 30);
+        Dotenv dotenv = Dotenv.configure().load();
         jbtLogin.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -62,7 +64,7 @@ public class LoginFrame extends JFrame {
                     try {
                         body.put("name", name);
                         body.put("password", password);
-                        JSONObject response = new JSONObject(ApiRequests.postRequestWithoutAuthentication(new URL("http://localhost:3000/api/user/login"), body.toString()));
+                        JSONObject response = new JSONObject(ApiRequests.postRequestWithoutAuthentication(new URL(dotenv.get("API_REQUEST_PREFIX")+"/user/login"), body.toString()));
                         //new OverviewFrame(response.getString("jwt"));
                         //new NewBookingFrame(response.getString("jwt"));
 
