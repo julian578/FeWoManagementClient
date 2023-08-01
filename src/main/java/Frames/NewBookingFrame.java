@@ -1,5 +1,6 @@
 package Frames;
 
+import Request.ApiData;
 import Request.ApiRequests;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -238,19 +239,19 @@ public class NewBookingFrame extends JFrame {
                     jblNameOfBookingPerson.setForeground(Color.RED);
                     mistake = true;
                 }
-                if(!validatePhoneNumbers(jtfPhoneNumber, jtfMobilePhoneNumber)) {
-                    jlbPhoneNumber.setForeground(Color.RED);
-                    jlbMobilePhoneNumber.setForeground(Color.RED);
-                    mistake = true;
-                }
-                if(!validateStringField(jtfEmail)) {
-                    jlbEmail.setForeground(Color.RED);
-                    mistake = true;
-                }
-                if(!validateStringField(jtfStreet) || !validateNumericField(jtfHouseNumber)) {
-                    jlbStreetAndHousenumber.setForeground(Color.RED);
-                    mistake = true;
-                }
+                //if(!validatePhoneNumbers(jtfPhoneNumber, jtfMobilePhoneNumber)) {
+                    //jlbPhoneNumber.setForeground(Color.RED);
+                    //jlbMobilePhoneNumber.setForeground(Color.RED);
+                    //mistake = true;
+                //}
+                //if(!validateStringField(jtfEmail)) {
+                    //jlbEmail.setForeground(Color.RED);
+                   // mistake = true;
+                //}
+                //if(!validateStringField(jtfStreet) || !validateNumericField(jtfHouseNumber)) {
+                    //jlbStreetAndHousenumber.setForeground(Color.RED);
+                    //mistake = true;
+                //}
                 if(!validateStringField(jtfCountry)) {
                     jtfCountry.setForeground(Color.RED);
                     mistake = true;
@@ -275,6 +276,11 @@ public class NewBookingFrame extends JFrame {
                     jblLeaving.setForeground(Color.RED);
                     mistake = true;
                 }
+
+                if(!validateFlatK(jtfFlatNumber, jtfNumberOfAdults, jtfNumberOfChildren)) {
+                    JOptionPane.showMessageDialog(null, "Die maximale Gästeanzahl in Wohnung K beträgt 2.");
+                    mistake = true;
+                }
                 if(!arrivalDateIsBeforeLeavingDate(jtfArrival.getText(), jtfLeaving.getText())) {
                     jblArrival.setForeground(Color.RED);
                     jblLeaving.setForeground(Color.RED);
@@ -282,41 +288,60 @@ public class NewBookingFrame extends JFrame {
                 }
 
 
+
                 if(!mistake) {
                     JSONObject clientBody = new JSONObject();
                     JSONObject bookingBody = new JSONObject();
                     int flatNumber = ((int) jtfFlatNumber.getText().charAt(0))-64;
+
                     String gender;
                     if(jrbFemale.isSelected()) gender = "Frau";
                     else gender = "Herr";
                     try {
                         clientBody.put("gender", gender);
                         clientBody.put("fullName", jtfNameOfBookingPerson.getText());
-                        clientBody.put("email", jtfEmail.getText());
-                        clientBody.put("street", jtfStreet.getText());
-                        clientBody.put("houseNumber", Integer.parseInt(jtfHouseNumber.getText()));
-                        clientBody.put("postalCode", jtfPostalCode.getText());
-                        clientBody.put("city", jtfCity.getText());
+                        if(validateStringField(jtfEmail)) {
+                            clientBody.put("email", jtfEmail.getText());
+                        } else clientBody.put("email", "-");
+                        if(validateStringField(jtfStreet)) {
+                            clientBody.put("street", jtfStreet.getText());
+                        } else clientBody.put("street", "-");
+                        if(validateStringField(jtfHouseNumber)) {
+                            clientBody.put("houseNumber", jtfHouseNumber.getText());
+                        } else clientBody.put("houseNumber", "-");
+
+                        if(validateStringField(jtfPostalCode)) {
+                            clientBody.put("postalCode", jtfPostalCode.getText());
+                        } else clientBody.put("postalCode", "-");
+                        if(validateStringField(jtfCity)) {
+                            clientBody.put("city", jtfCity.getText());
+                        } else clientBody.put("city", "-");
                         clientBody.put("country", jtfCountry.getText());
 
-                        if(validateStringField(jtfPhoneNumber)) clientBody.put("phone", jtfPhoneNumber.getText());
-                        if(validateStringField(jtfMobilePhoneNumber)) clientBody.put("mobilePhone",jtfMobilePhoneNumber.getText());
-                        if(validateStringField(jtfTaxId)) clientBody.put("taxId", jtfTaxId.getText());
+                        if(validateStringField(jtfPhoneNumber)) {
+                            clientBody.put("phone", jtfPhoneNumber.getText());
+                        } else clientBody.put("phone", "-");
+                        if(validateStringField(jtfMobilePhoneNumber)) {
+                            clientBody.put("mobilePhone",jtfMobilePhoneNumber.getText());
+                        } else clientBody.put("mobilePhone", "-");
+                        if(validateStringField(jtfTaxId)) {
+                            clientBody.put("taxId", jtfTaxId.getText());
+                        } else clientBody.put("taxId", "-");
 
                         JSONObject availabilityBody = new JSONObject();
                         availabilityBody.put("arrivalDate", jtfArrival.getText());
                         availabilityBody.put("leavingDate", jtfLeaving.getText());
                         availabilityBody.put("flatNumber", flatNumber);
-                        JSONObject availabilityResponse = new JSONObject(ApiRequests.postRequest(new URL("http://localhost:3000/api/booking/available"), availabilityBody.toString(), jwt));
+                        JSONObject availabilityResponse = new JSONObject(ApiRequests.postRequest(new URL(ApiData.dotenv.get("API_REQUEST_PREFIX")+"/booking/available"), availabilityBody.toString(), jwt));
 
                         if((boolean)availabilityResponse.get("available")) {
-                            String clientResponse = ApiRequests.postRequest(new URL("http://localhost:3000/api/booking/client"), clientBody.toString(), jwt);
+                            String clientResponse = ApiRequests.postRequest(new URL(ApiData.dotenv.get("API_REQUEST_PREFIX")+"/booking/client"), clientBody.toString(), jwt);
                             JSONObject client = new JSONObject(clientResponse);
 
                             bookingBody.put("flatNumber", ((int)jtfFlatNumber.getText().charAt(0))-64);
                             bookingBody.put("numberOfAdults", Integer.parseInt(jtfNumberOfAdults.getText()));
                             bookingBody.put("numberOfChildren", Integer.parseInt(jtfNumberOfChildren.getText()));
-                            bookingBody.put("numberOfAnimals", Integer.parseInt(jtfNumberOfChildren.getText()));
+                            bookingBody.put("numberOfAnimals", Integer.parseInt(jtfNumberOfAnimals.getText()));
                             bookingBody.put("arrivalDate", jtfArrival.getText());
                             bookingBody.put("leavingDate", jtfLeaving.getText());
                             bookingBody.put("clientId", client.get("_id"));
@@ -325,8 +350,8 @@ public class NewBookingFrame extends JFrame {
                             if(validateStringField(jtfListOfNames)) {
                                 String listOfNames = jtfNameOfBookingPerson.getText() + ", "+jtfListOfNames.getText();
                                 bookingBody.put("listOfNames", listOfNames);
-                            }
-                            ApiRequests.postRequest(new URL("http://localhost:3000/api/booking/create"), bookingBody.toString(), jwt);
+                            } else bookingBody.put("listOfNames", "-");
+                            ApiRequests.postRequest(new URL(ApiData.dotenv.get("API_REQUEST_PREFIX")+"/booking/create"), bookingBody.toString(), jwt);
 
                             JOptionPane.showMessageDialog(null, "Neue Buchung erfolgreich erstellt");
                             dispose();
@@ -376,6 +401,18 @@ public class NewBookingFrame extends JFrame {
 
     private boolean validateFlatNumber(JTextField input) {
         return input.getText().equals("A") || input.getText().equals("B") || input.getText().equals("C") || input.getText().equals("D") || input.getText().equals("E") || input.getText().equals("K");
+    }
+
+    //flat K only allows two guests
+    private boolean validateFlatK(JTextField jtfFlatNumber, JTextField jtfNumberOfAdults, JTextField jtfNumberOfChildren) {
+
+        try {
+            return !jtfFlatNumber.getText().equals("K") || Integer.parseInt(jtfNumberOfAdults.getText()) + Integer.parseInt(jtfNumberOfChildren.getText()) <= 2;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return false;
+
     }
 
     private boolean validatePhoneNumbers(JTextField phone, JTextField mobile) {

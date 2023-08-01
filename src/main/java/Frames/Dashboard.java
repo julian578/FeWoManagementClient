@@ -55,6 +55,8 @@ public class Dashboard extends JFrame {
                     throw new RuntimeException(ex);
                 } catch (JSONException ex) {
                     throw new RuntimeException(ex);
+                } catch (InterruptedException ex) {
+                    throw new RuntimeException(ex);
                 }
             }
         });
@@ -66,7 +68,8 @@ public class Dashboard extends JFrame {
             @Override
             public void actionPerformed(ActionEvent e) {
                 try {
-                    new InvoiceOverviewFrame(jwt);
+                    ApiData.loadBookings(jwt);
+                    new InvoiceOverviewFrame(jwt, (ArrayList<Booking>) ApiData.bookingList);
                 } catch (JSONException ex) {
                     throw new RuntimeException(ex);
                 } catch (IOException ex) {

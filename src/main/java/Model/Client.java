@@ -2,18 +2,19 @@ package Model;
 
 public class Client {
 
+    private String id;
     private String fullName;
     private String mobilePhone;
     private String phone;
     private String email;
     private String street;
-    private int houseNumber;
+    private String houseNumber;
     private String postalCode;
     private String city;
     private String country;
     private String taxId;
 
-    public Client(String fullName, String mobilePhone, String phone, String email, String street, int houseNumber, String postalCode, String city, String country, String taxId) {
+    public Client(String fullName, String mobilePhone, String phone, String email, String street, String houseNumber, String postalCode, String city, String country, String taxId) {
         this.fullName = fullName;
         this.mobilePhone = mobilePhone;
         this.phone = phone;
@@ -26,7 +27,7 @@ public class Client {
         this.taxId = taxId;
     }
 
-    public Client(String fullName, String email, String street, int houseNumber, String postalCode, String city, String country) {
+    public Client(String fullName, String email, String street, String houseNumber, String postalCode, String city, String country) {
         this.fullName = fullName;
         this.email = email;
         this.street = street;
@@ -34,6 +35,28 @@ public class Client {
         this.postalCode = postalCode;
         this.city = city;
         this.country = country;
+    }
+
+    public Client(String id, String fullName, String mobilePhone, String phone, String email, String street, String houseNumber, String postalCode, String city, String country, String taxId) {
+        this.id = id;
+        this.fullName = fullName;
+        this.mobilePhone = mobilePhone;
+        this.phone = phone;
+        this.email = email;
+        this.street = street;
+        this.houseNumber = houseNumber;
+        this.postalCode = postalCode;
+        this.city = city;
+        this.country = country;
+        this.taxId = taxId;
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
     }
 
     public String getFullName() {
@@ -76,11 +99,11 @@ public class Client {
         this.street = street;
     }
 
-    public int getHouseNumber() {
+    public String getHouseNumber() {
         return houseNumber;
     }
 
-    public void setHouseNumber(int houseNumber) {
+    public void setHouseNumber(String houseNumber) {
         this.houseNumber = houseNumber;
     }
 

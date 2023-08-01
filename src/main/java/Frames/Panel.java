@@ -212,12 +212,17 @@ public class Panel extends JLabel {
     //creates the background table for the calendar view
     public void drawTable(Graphics g) {
         g.setFont(new Font("TimesRoman", Font.PLAIN, 15));
-        for(int i = 1; i <= 7; i++) {
-            g.drawLine(100*i, 0, 100*i, 400);
+        for(int i = 1; i <= 5; i++) {
+            g.drawLine(100*i, 0, 100*i, 350);
             g.drawLine(0, i*50, 800, i*50);
             g.drawString("Wohnung " + (char)(64+i), 5, i*50 + 30);
         }
-        g.drawLine(0, 400, 800, 400);
+        g.drawString("Wohnung K", 5, 330);
+        g.drawLine(600, 0, 600, 350);
+        g.drawLine(700, 0, 700, 350);
+        g.drawLine(800, 0, 800, 350);
+        g.drawLine(0, 300, 800, 300);
+
     }
 
     public void drawCalender(Graphics g) {
@@ -254,11 +259,18 @@ public class Panel extends JLabel {
                     }
                 }
 
-
+                int yPos;
+                if(b.getFlatNumber() == 11) {
+                    yPos = 300;
+                } else {
+                    yPos = b.getFlatNumber() * 50;
+                }
 
 
                 if (arrivingIndex != -1 && leavingIndex != -1) {
-                    bl = new BookingLabel(b, 150 + arrivingIndex * 100, b.getFlatNumber() * 50, (leavingIndex - arrivingIndex) * 100, 50);
+
+
+                    bl = new BookingLabel(b, 150 + arrivingIndex * 100, yPos, (leavingIndex - arrivingIndex) * 100, 50);
                     bl.setLabelColor(getLabelColor(b));
                     bookingLabels.add(bl);
                 }
@@ -266,19 +278,19 @@ public class Panel extends JLabel {
                 else if(arrivingIndex != -1 && leavingIndex == -1) {
 
                     endIndex = 6;
-                    bl = new BookingLabel(b, 150 + arrivingIndex * 100, b.getFlatNumber() * 50, (endIndex - arrivingIndex) * 100 + 50, 50);
+                    bl = new BookingLabel(b, 150 + arrivingIndex * 100, yPos, (endIndex - arrivingIndex) * 100 + 50, 50);
                     bl.setLabelColor(getLabelColor(b));
                     bookingLabels.add(bl);
                 }
 
                 else if(arrivingIndex == -1 && leavingIndex != -1) {
 
-                    bl = new BookingLabel(b, 100, b.getFlatNumber() * 50, (leavingIndex+1) * 100 - 50, 50);
+                    bl = new BookingLabel(b, 100, yPos, (leavingIndex+1) * 100 - 50, 50);
                     bl.setLabelColor(getLabelColor(b));
                     bookingLabels.add(bl);
                 }
                 else if (b.getArrivingDate().before(new SimpleDateFormat("dd.MM.yyyy").parse(headerDates[0])) && b.getLeavingDate().after(new SimpleDateFormat("dd.MM.yyyy").parse(headerDates[6]))) {
-                    bl = new BookingLabel(b, 100, b.getFlatNumber() * 50, 800, 50);
+                    bl = new BookingLabel(b, 100, yPos, 800, 50);
                     bl.setLabelColor(getLabelColor(b));
                     bookingLabels.add(bl);
                 }

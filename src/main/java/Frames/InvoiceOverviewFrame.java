@@ -4,13 +4,21 @@ import Model.Booking;
 import Model.Client;
 import Model.InvoiceLabel;
 import Request.ApiData;
+import Request.ApiRequests;
+import io.github.cdimascio.dotenv.Dotenv;
+import org.json.JSONArray;
 import org.json.JSONException;
+import org.json.JSONObject;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
 import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -19,6 +27,7 @@ import java.util.HashMap;
 
 //InvoiceOverviewFrame invoice status of all bookings and allows the user to generate an invoice for a booking
 public class InvoiceOverviewFrame extends JFrame {
+
 
     private String jwt;
     private ArrayList<Booking> bookingList = new ArrayList<>();
@@ -33,12 +42,17 @@ public class InvoiceOverviewFrame extends JFrame {
     private JLabel jlbSearchName = new JLabel("Suchen nach Name");
     private JTextField jtfSearchInvoiceNumber = new JTextField();
     private JTextField jtfSearchName = new JTextField();
-    public InvoiceOverviewFrame(String jwt) throws JSONException, IOException, ParseException, InterruptedException {
+
+    private JButton jbtSearchname = new JButton("Suchen");
+
+    private JButton jbtSearchInvoiceNumber = new JButton("Suchen");
+    public InvoiceOverviewFrame(String jwt, ArrayList<Booking> bookings) throws JSONException, IOException, ParseException, InterruptedException {
         this.jwt = jwt;
         this.setLocationRelativeTo(null);
 
         this.setSize(800, 600);
 
+        this.bookingList = bookings;
 
         initPanel();
 
@@ -50,9 +64,47 @@ public class InvoiceOverviewFrame extends JFrame {
 
         jpSearchInvoiceNumber.add(jlbSearchInvoiceNumber);
         jpSearchInvoiceNumber.add(jtfSearchInvoiceNumber);
+        jpSearchInvoiceNumber.add(jbtSearchInvoiceNumber);
+
+        jbtSearchInvoiceNumber.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                try {
+                    searchByInvoiceNumber(jtfSearchInvoiceNumber.getText());
+                } catch (IOException ex) {
+                    throw new RuntimeException(ex);
+                } catch (JSONException ex) {
+                    throw new RuntimeException(ex);
+                } catch (ParseException ex) {
+                    throw new RuntimeException(ex);
+                } catch (InterruptedException ex) {
+                    throw new RuntimeException(ex);
+                }
+            }
+
+        });
+
+        jbtSearchname.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                try {
+                    searchByName(jtfSearchName.getText());
+                } catch (IOException ex) {
+                    throw new RuntimeException(ex);
+                } catch (JSONException ex) {
+                    throw new RuntimeException(ex);
+                } catch (ParseException ex) {
+                    throw new RuntimeException(ex);
+                } catch (InterruptedException ex) {
+                    throw new RuntimeException(ex);
+                }
+            }
+        });
 
         jpSearchName.add(jlbSearchName);
         jpSearchName.add(jtfSearchName);
+        jpSearchName.add(jbtSearchname);
+
 
         jpSearch.add(jpSearchName);
         jpSearch.add(Box.createHorizontalStrut(50));
@@ -65,7 +117,7 @@ public class InvoiceOverviewFrame extends JFrame {
 
 
 
-        addInvoiceLabels();
+        addInvoiceLabels(bookings);
 
         JScrollPane scrollPane = new JScrollPane(panel);
         scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
@@ -74,15 +126,14 @@ public class InvoiceOverviewFrame extends JFrame {
         this.setVisible(true);
     }
 
-    public void addInvoiceLabels() throws JSONException, IOException, ParseException, InterruptedException {
+    public void addInvoiceLabels(ArrayList<Booking> bookings) throws JSONException, IOException, ParseException, InterruptedException {
 
-        ApiData.loadBookings(jwt);
+        //ApiData.loadBookings(jwt);
 
         ApiData.loadClients(jwt);
 
 
-        for(Booking b : ApiData.bookingList) {
-
+        for(Booking b : bookings) {
 
             Client c = ApiData.clientList.get(b.getId());
             panel.add(new InvoiceLabel(b.getId(), b.getArrivingDate(), b.getLeavingDate(), b.getInvoiceStatus(), c ,jwt, this));
@@ -95,7 +146,35 @@ public class InvoiceOverviewFrame extends JFrame {
     private void initPanel() {
         panel = new JPanel();
         panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
+
     }
 
+    private void searchByName(String name) throws IOException, JSONException, ParseException, InterruptedException {
 
+
+        Dotenv dotenv = Dotenv.configure().load();
+        JSONObject body = new JSONObject();
+        body.put("name", name);
+        JSONArray bookings = new JSONArray(ApiRequests.postRequest(new URL(dotenv.get("API_REQUEST_PREFIX")+"/booking/name"), body.toString(), jwt).toString());
+
+        new InvoiceOverviewFrame(jwt,ApiData.jsonArrayToBookingList(bookings));
+        this.dispose();
+    }
+
+    private void searchByInvoiceNumber(String invoiceNumber) throws IOException, JSONException, ParseException, InterruptedException {
+        Dotenv dotenv = Dotenv.configure().load();
+
+        JSONArray bookings = new JSONArray(ApiRequests.getRequest(new URL(dotenv.get("API_REQUEST_PREFIX")+"/booking/invoice/"+invoiceNumber), jwt).toString());
+
+        new InvoiceOverviewFrame(jwt,ApiData.jsonArrayToBookingList(bookings));
+        this.dispose();
+    }
+
+    public ArrayList<Booking> getBookingList() {
+        return bookingList;
+    }
+
+    public void setBookingList(ArrayList<Booking> bookingList) {
+        this.bookingList = bookingList;
+    }
 }

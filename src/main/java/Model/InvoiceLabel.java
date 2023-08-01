@@ -1,6 +1,8 @@
 package Model;
 
+import Frames.BookingFrame;
 import Frames.InvoiceOverviewFrame;
+import Request.ApiData;
 import Request.ApiRequests;
 import io.github.cdimascio.dotenv.Dotenv;
 import org.json.JSONException;
@@ -16,6 +18,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.text.DateFormat;
 import java.text.ParseException;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.Locale;
 
@@ -26,13 +29,14 @@ public class InvoiceLabel extends JPanel {
     private JLabel jlbName;
 
     private JLabel jlbDate;
-    private JLabel jlbInvoiceCreatedAndSent = new JLabel("Rechnung erstellt.");
+    private JLabel jlbInvoiceCreatedAndSent = new JLabel("Rechnung erstellt und verschickt.");
 
     private JLabel jlbBookingNumber = new JLabel();
 
     private JButton jbtInvoice = new JButton("Rechnung erstellen");
     private JButton jbtSendInvoice = new JButton("Rechnung verschicken");
 
+    private JButton jbtShowBookingDetails = new JButton("Buchung anzeigen");
 
     private Locale loc = new Locale("de", "DE");
     private DateFormat dateFormat = DateFormat.getDateInstance(DateFormat.DEFAULT, loc);
@@ -73,10 +77,12 @@ public class InvoiceLabel extends JPanel {
                 JSONObject body = new JSONObject();
                 try {
                     body.put("bookingId", bookingId);
-                    ApiRequests.postRequest(new URL("http://localhost:3000/api/invoice/"), body.toString(), jwt);
+                    ApiRequests.postRequest(new URL(ApiData.dotenv.get("API_REQUEST_PREFIX")+"/invoice/"), body.toString(), jwt);
                     JOptionPane.showMessageDialog(null, "Rechnung erfolgreich erstellt");
 
-                    new InvoiceOverviewFrame(jwt);
+                    ApiData.loadBookings(jwt);
+                    frame.setBookingList((ArrayList<Booking>) ApiData.bookingList);
+                    new InvoiceOverviewFrame(jwt, frame.getBookingList());
                     frame.dispose();
                 } catch (JSONException ex) {
                     throw new RuntimeException(ex);
@@ -99,10 +105,28 @@ public class InvoiceLabel extends JPanel {
         Border blackBorder = BorderFactory.createLineBorder(Color.BLACK);
         this.setBorder(blackBorder);
 
+        this.add(jbtShowBookingDetails);
+        jbtShowBookingDetails.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+
+                try {
+                    new BookingFrame(ApiData.getBookingFromBookingId(bookingId), jwt);
+                } catch (JSONException ex) {
+                    throw new RuntimeException(ex);
+                } catch (IOException ex) {
+                    throw new RuntimeException(ex);
+                }
+
+            }
+        });
+
 
         if(invoiceStatus == 0) {
             jbtInvoice.setVisible(true);
         } else if(invoiceStatus == 1) {
+            jbtSendInvoice.setVisible(true);
+        } else {
             jlbInvoiceCreatedAndSent.setVisible(true);
         }
         this.setVisible(true);
@@ -111,10 +135,16 @@ public class InvoiceLabel extends JPanel {
 
     private String loadInvoiceId(String bookingId, String jwt) throws IOException, JSONException {
 
-        Dotenv dotenv = Dotenv.configure().load();
-        JSONObject response = new JSONObject(ApiRequests.getRequest(new URL(dotenv.get("API_REQUEST_PREFIX")+"/invoice/"+bookingId), jwt));
+        try {
+            Dotenv dotenv = Dotenv.configure().load();
+            JSONObject response = new JSONObject(ApiRequests.getRequest(new URL(dotenv.get("API_REQUEST_PREFIX")+"/invoice/"+bookingId), jwt));
 
-        return response.get("invoiceId").toString();
+            return response.get("invoiceId").toString();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return "";
+        }
+
     }
 
     public void rerenderPanel() {
