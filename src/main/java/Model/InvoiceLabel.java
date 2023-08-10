@@ -2,11 +2,25 @@ package Model;
 
 import Frames.BookingFrame;
 import Frames.InvoiceOverviewFrame;
+import InvoiceCreation.WordDocumentGenerator;
 import Request.ApiData;
 import Request.ApiRequests;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import freemarker.template.TemplateException;
 import io.github.cdimascio.dotenv.Dotenv;
+import org.apache.http.Header;
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.ContentType;
+import org.apache.http.entity.StringEntity;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClients;
+import org.apache.http.util.EntityUtils;
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+
 
 import javax.swing.*;
 import javax.swing.border.Border;
@@ -14,13 +28,15 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.MalformedURLException;
+import java.net.URISyntaxException;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.text.DateFormat;
 import java.text.ParseException;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.Locale;
+import java.util.*;
 
 
 public class InvoiceLabel extends JPanel {
@@ -74,19 +90,83 @@ public class InvoiceLabel extends JPanel {
         jbtInvoice.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                JSONObject body = new JSONObject();
-                try {
-                    body.put("bookingId", bookingId);
-                    ApiRequests.postRequest(new URL(ApiData.dotenv.get("API_REQUEST_PREFIX")+"/invoice/"), body.toString(), jwt);
-                    JOptionPane.showMessageDialog(null, "Rechnung erfolgreich erstellt");
 
-                    ApiData.loadBookings(jwt);
-                    frame.setBookingList((ArrayList<Booking>) ApiData.bookingList);
-                    new InvoiceOverviewFrame(jwt, frame.getBookingList());
-                    frame.dispose();
+
+
+
+                try(CloseableHttpClient httpClient = HttpClients.createDefault()) {
+
+                    HttpPost httpPost = new HttpPost(ApiData.dotenv.get("API_REQUEST_PREFIX")+"/invoice/");
+                    httpPost.addHeader("Content-Type", "application/json");
+                    httpPost.addHeader("Authorization", "Bearer "+jwt);
+
+                    // Set the dynamic data as the request body
+                    Map<String, Object> dynamicData = new HashMap<>();
+                    dynamicData.put("bookingId", bookingId);
+
+
+
+                    ObjectMapper objectMapper = new ObjectMapper();
+                    String jsonData = objectMapper.writeValueAsString(dynamicData);
+                    StringEntity requestEntity = new StringEntity(jsonData, ContentType.APPLICATION_JSON);
+                    httpPost.setEntity(requestEntity);
+
+                    // Send the request and get the response
+                    HttpResponse response = httpClient.execute(httpPost);
+                    HttpEntity responseEntity = response.getEntity();
+
+
+
+
+                    // Check if the response status is successful
+                    if (response.getStatusLine().getStatusCode() == 200) {
+
+                        // Convert the response entity to a byte array
+                        byte[] binaryData = EntityUtils.toByteArray(responseEntity);
+
+                        //get invoice number for the invoice file name
+                        JSONObject invoiceRes = new JSONObject(ApiRequests.getRequest(new URL(ApiData.dotenv.get("API_REQUEST_PREFIX")+"/invoice/"+bookingId), jwt));
+
+                        int invoiceNumber = (int) invoiceRes.get("invoiceId");
+
+                        //get the client name for the invoice file name
+
+
+                        String clientName = ApiData.clientList.get(bookingId).getFullName();
+
+                        WordDocumentGenerator.generateInvoice(binaryData, clientName, invoiceNumber);
+
+
+                        JOptionPane.showMessageDialog(null, "Rechnung erfolgreich erstellt");
+                        ApiData.loadBookings(jwt);
+
+
+
+
+                    } else {
+                        System.out.println("Failed to receive the Word document. Status code: " + response.getStatusLine().getStatusCode());
+                        JOptionPane.showMessageDialog(null, "Etwas ist schief gelaufen.");
+                    }
+
+
+
                 } catch (JSONException ex) {
                     throw new RuntimeException(ex);
-                } catch (MalformedURLException ex) {
+                } catch (IOException ex) {
+                    throw new RuntimeException(ex);
+                } catch (ParseException ex) {
+                    throw new RuntimeException(ex);
+                } catch (InterruptedException ex) {
+                    throw new RuntimeException(ex);
+                } catch (TemplateException ex) {
+                    throw new RuntimeException(ex);
+                } catch (URISyntaxException ex) {
+                    throw new RuntimeException(ex);
+                }
+                frame.setBookingList((ArrayList<Booking>) ApiData.bookingList);
+                try {
+                    new InvoiceOverviewFrame(jwt, frame.getBookingList());
+                } catch (JSONException ex) {
                     throw new RuntimeException(ex);
                 } catch (IOException ex) {
                     throw new RuntimeException(ex);
@@ -95,6 +175,8 @@ public class InvoiceLabel extends JPanel {
                 } catch (InterruptedException ex) {
                     throw new RuntimeException(ex);
                 }
+                frame.dispose();
+
 
             }
         });
@@ -137,7 +219,7 @@ public class InvoiceLabel extends JPanel {
 
         try {
             Dotenv dotenv = Dotenv.configure().load();
-            JSONObject response = new JSONObject(ApiRequests.getRequest(new URL(dotenv.get("API_REQUEST_PREFIX")+"/invoice/"+bookingId), jwt));
+            org.json.JSONObject response = new org.json.JSONObject(ApiRequests.getRequest(new URL(dotenv.get("API_REQUEST_PREFIX")+"/invoice/"+bookingId), jwt));
 
             return response.get("invoiceId").toString();
         } catch (Exception e) {
