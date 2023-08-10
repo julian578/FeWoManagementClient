@@ -1,20 +1,13 @@
 package InvoiceCreation;
 
-import Model.Booking;
-import Model.Client;
-import freemarker.template.Configuration;
-import freemarker.template.Template;
+import Data.ApiData;
+import Data.PropertiesConfig;
 import freemarker.template.TemplateException;
 import org.json.JSONException;
-import org.json.JSONObject;
 
 import java.io.*;
 import java.net.URISyntaxException;
-import java.net.URL;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Paths;
-import java.util.HashMap;
-import java.util.Map;
+
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
 
 public class WordDocumentGenerator {
@@ -22,14 +15,14 @@ public class WordDocumentGenerator {
 
 
     public static void generateInvoice(byte[] binaryData, String name, int invoiceNumber) throws IOException, JSONException, TemplateException, URISyntaxException {
-        String outputFolderPath = "/Users/julianjacobs/Library/CloudStorage/OneDrive-Persönlich/";
+        String outputFolderPath = PropertiesConfig.getInvoiceFolderPath();
         try (ByteArrayInputStream bis = new ByteArrayInputStream(binaryData);
              FileOutputStream fos = new FileOutputStream(outputFolderPath+"Rechnung(invoice)_"+name+"_"+invoiceNumber+".docx")) {
 
             XWPFDocument doc = new XWPFDocument(bis);
             doc.write(fos);
             File outputFile = new File("Rechnung(invoice)_"+name+"_"+invoiceNumber+".docx");
-            System.out.println("Word document recreated and saved successfully." + outputFile.getAbsolutePath());
+            System.out.println("Word document recreated and saved successfully.");
         } catch (IOException e) {
             e.printStackTrace();
         }

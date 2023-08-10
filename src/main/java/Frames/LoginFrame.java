@@ -1,6 +1,9 @@
 package Frames;
 
-import Request.ApiRequests;
+import Data.ApiData;
+import Data.ApiRequests;
+import Data.PropertiesConfig;
+import com.fasterxml.jackson.databind.annotation.JsonAppend;
 import io.github.cdimascio.dotenv.Dotenv;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -13,11 +16,9 @@ import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
-import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.text.ParseException;
-import java.util.ArrayList;
 
 import static InvoiceCreation.EMLFileGenerator.createEMLFile;
 
@@ -84,7 +85,9 @@ public class LoginFrame extends JFrame {
                         //new OverviewFrame(response.getString("jwt"));
                         //new NewBookingFrame(response.getString("jwt"));
 
+
                         new Dashboard(response.getString("jwt"));
+                        PropertiesConfig.loadConfig();
                         dispose();
 
 

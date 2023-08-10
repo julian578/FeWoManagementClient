@@ -1,14 +1,14 @@
-package Request;
+package Data;
 
 import Model.Booking;
 import Model.Client;
+import com.fasterxml.jackson.databind.annotation.JsonAppend;
 import io.github.cdimascio.dotenv.Dotenv;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -21,6 +21,7 @@ public class ApiData {
     public static List<Booking> bookingList = new ArrayList<>();
     public static HashMap<String, Client> clientList = new HashMap<String, Client>();
     public static Dotenv dotenv = Dotenv.configure().load();
+
 
 
     public static void loadBookings(String jwt) throws JSONException, IOException, ParseException, InterruptedException {

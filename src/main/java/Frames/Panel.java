@@ -2,12 +2,8 @@ package Frames;
 
 import Model.Booking;
 import Model.BookingLabel;
-import Model.Client;
-import Request.ApiData;
-import Request.ApiRequests;
-import org.json.JSONArray;
+import Data.ApiData;
 import org.json.JSONException;
-import org.json.JSONObject;
 
 import javax.swing.*;
 import java.awt.*;
@@ -15,12 +11,8 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
-import java.net.URL;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;

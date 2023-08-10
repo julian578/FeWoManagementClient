@@ -2,24 +2,17 @@ package Frames;
 
 import Model.Booking;
 import Model.Client;
-import Request.ApiData;
-import Request.ApiRequests;
-import org.json.JSONArray;
+import Data.ApiData;
 import org.json.JSONException;
-import org.json.JSONObject;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 
 
 //Dashboard is opened after log in; user can chosse between Calendar view and invoice mangement tool
@@ -28,6 +21,8 @@ public class Dashboard extends JFrame {
     private String jwt;
     private JButton jbtBookingOverview = new JButton("Kalenderansicht der Buchungen");
     private JButton jbtInvoiceOverview = new JButton("Rechnungen verwalten");
+
+    private JButton jbtSettings = new JButton("Einstellungen");
 
     private ArrayList<Booking> bookingList = new ArrayList<>();
     private HashMap<String, Client> clientList = new HashMap<String, Client>();
@@ -83,6 +78,16 @@ public class Dashboard extends JFrame {
         });
         this.add(jbtInvoiceOverview);
 
+        jbtSettings.setBounds(10, 300, 400, 80);
+        jbtSettings.setFont(new Font("Arial", Font.PLAIN, 25));
+        jbtSettings.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                new SettingsFrame(jwt);
+            }
+        });
+
+        this.add(jbtSettings);
         this.setVisible(true);
     }
 

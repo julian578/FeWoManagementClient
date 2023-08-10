@@ -1,12 +1,7 @@
-package Request;
-
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
+package Data;
 
 import java.io.*;
 import java.net.HttpURLConnection;
-import java.net.ProtocolException;
 import java.net.URL;
 
 public class ApiRequests {

@@ -14,6 +14,8 @@ public class Main {
     public static void main(String[] args) throws ParseException, IOException, JSONException, URISyntaxException {
         //new Gui();
         new LoginFrame();
+        String mainF = System.getProperty("user.dir");
+        System.out.println(mainF);
 
 
     }

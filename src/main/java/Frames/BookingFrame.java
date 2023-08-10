@@ -2,8 +2,8 @@ package Frames;
 
 import Model.Booking;
 import Model.Client;
-import Request.ApiData;
-import Request.ApiRequests;
+import Data.ApiData;
+import Data.ApiRequests;
 import io.github.cdimascio.dotenv.Dotenv;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -12,7 +12,6 @@ import javax.swing.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.IOException;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.text.DateFormat;
 import java.util.Locale;
