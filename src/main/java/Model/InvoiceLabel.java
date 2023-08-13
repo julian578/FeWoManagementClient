@@ -1,7 +1,9 @@
 package Model;
 
+import Data.PropertiesConfig;
 import Frames.BookingFrame;
 import Frames.InvoiceOverviewFrame;
+import InvoiceCreation.EMLFileGenerator;
 import InvoiceCreation.WordDocumentGenerator;
 import Data.ApiData;
 import Data.ApiRequests;
@@ -25,11 +27,14 @@ import javax.swing.border.Border;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.text.DateFormat;
 import java.text.ParseException;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 
@@ -85,78 +90,8 @@ public class InvoiceLabel extends JPanel {
             @Override
             public void actionPerformed(ActionEvent e) {
 
+                WordDocumentGenerator.createInvoice(jwt, bookingId);
 
-
-
-                try(CloseableHttpClient httpClient = HttpClients.createDefault()) {
-
-                    HttpPost httpPost = new HttpPost(ApiData.dotenv.get("API_REQUEST_PREFIX")+"/invoice/");
-                    httpPost.addHeader("Content-Type", "application/json");
-                    httpPost.addHeader("Authorization", "Bearer "+jwt);
-
-                    // Set the dynamic data as the request body
-                    Map<String, Object> dynamicData = new HashMap<>();
-                    dynamicData.put("bookingId", bookingId);
-
-
-
-                    ObjectMapper objectMapper = new ObjectMapper();
-                    String jsonData = objectMapper.writeValueAsString(dynamicData);
-                    StringEntity requestEntity = new StringEntity(jsonData, ContentType.APPLICATION_JSON);
-                    httpPost.setEntity(requestEntity);
-
-                    // Send the request and get the response
-                    HttpResponse response = httpClient.execute(httpPost);
-                    HttpEntity responseEntity = response.getEntity();
-
-
-
-
-                    // Check if the response status is successful
-                    if (response.getStatusLine().getStatusCode() == 200) {
-
-                        // Convert the response entity to a byte array
-                        byte[] binaryData = EntityUtils.toByteArray(responseEntity);
-
-                        //get invoice number for the invoice file name
-                        JSONObject invoiceRes = new JSONObject(ApiRequests.getRequest(new URL(ApiData.dotenv.get("API_REQUEST_PREFIX")+"/invoice/"+bookingId), jwt));
-
-                        int invoiceNumber = (int) invoiceRes.get("invoiceId");
-
-                        //get the client name for the invoice file name
-
-
-                        String clientName = ApiData.clientList.get(bookingId).getFullName();
-
-                        WordDocumentGenerator.generateInvoice(binaryData, clientName, invoiceNumber);
-
-
-                        JOptionPane.showMessageDialog(null, "Rechnung erfolgreich erstellt");
-                        ApiData.loadBookings(jwt);
-
-
-
-
-                    } else {
-                        System.out.println("Failed to receive the Word document. Status code: " + response.getStatusLine().getStatusCode());
-                        JOptionPane.showMessageDialog(null, "Etwas ist schief gelaufen.");
-                    }
-
-
-
-                } catch (JSONException ex) {
-                    throw new RuntimeException(ex);
-                } catch (IOException ex) {
-                    throw new RuntimeException(ex);
-                } catch (ParseException ex) {
-                    throw new RuntimeException(ex);
-                } catch (InterruptedException ex) {
-                    throw new RuntimeException(ex);
-                } catch (TemplateException ex) {
-                    throw new RuntimeException(ex);
-                } catch (URISyntaxException ex) {
-                    throw new RuntimeException(ex);
-                }
                 frame.setBookingList((ArrayList<Booking>) ApiData.bookingList);
                 try {
                     new InvoiceOverviewFrame(jwt, frame.getBookingList());
@@ -170,12 +105,76 @@ public class InvoiceLabel extends JPanel {
                     throw new RuntimeException(ex);
                 }
                 frame.dispose();
-
-
             }
         });
         jbtInvoice.setVisible(false);
 
+
+        jbtSendInvoice.addActionListener(new ActionListener() {
+
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if(!client.getEmail().equals("-") && !client.getEmail().equals("")) {
+                    String recipientEmail = client.getEmail();
+                    LocalDate currentDate = LocalDate.now();
+                    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy");
+                    String formattedDate = currentDate.format(formatter);
+                    String subject = "Rechnung "+jlbBookingNumber.getText().substring(17)+ " vom "+formattedDate + " Haus Cornelia";
+                    String body = "Guten Tag, \n anbei erhalten Sie die Rechnung zu ihrer Buchung im Haus Cornelia. \nMit freundlichen Grüßen \nKornelia Heinrici";
+                    String attachmentFilePath = PropertiesConfig.getInvoiceFolderPath()+"/Rechnung(invoice)_"+client.getFullName()+"_"+jlbBookingNumber.getText().substring(17)+".docx";
+                    File attFile = new File(attachmentFilePath);
+                    if(attFile.exists()) {
+                        //REPLACE
+                        String fromEmail = "julian.jacobs2611@gmail.com";
+
+                        try {
+                            EMLFileGenerator.createEMLFile(fromEmail, recipientEmail, subject, body, attachmentFilePath);
+
+                            //update invoice status
+                            JSONObject updateBody = new JSONObject();
+                            updateBody.put("invoiceStatus", 2);
+                            System.out.println(jwt);
+                            int resCode = ApiRequests.putRequest(new URL(ApiData.dotenv.get("API_REQUEST_PREFIX") + "/booking/" + bookingId), updateBody.toString(), jwt);
+                            if (resCode == 200) {
+                                JOptionPane.showMessageDialog(null, "Rechnung erfolgreich verschickt");
+                            }
+
+                            Desktop.getDesktop().open(new File("mail.eml"));
+
+                            ApiData.loadBookings(jwt);
+                            frame.setBookingList((ArrayList<Booking>) ApiData.bookingList);
+                            try {
+                                new InvoiceOverviewFrame(jwt, frame.getBookingList());
+                            } catch (JSONException ex) {
+                                throw new RuntimeException(ex);
+                            } catch (IOException ex) {
+                                throw new RuntimeException(ex);
+                            } catch (ParseException ex) {
+                                throw new RuntimeException(ex);
+                            } catch (InterruptedException ex) {
+                                throw new RuntimeException(ex);
+                            }
+                            frame.dispose();
+                        } catch (IOException ex) {
+                            throw new RuntimeException(ex);
+                        } catch (JSONException ex) {
+                            throw new RuntimeException(ex);
+                        } catch (ParseException ex) {
+                            throw new RuntimeException(ex);
+                        } catch (InterruptedException ex) {
+                            throw new RuntimeException(ex);
+                        }
+                    } else {
+                        JOptionPane.showMessageDialog(null, "Rechnung konnte nicht gefunden werden. Email bitte manuell verschicken.");
+                    }
+
+
+
+                } else {
+                    JOptionPane.showMessageDialog(null, "Zu der Buchung ist keine Email-Adresse hinterlegt. Bitte hinzufügen");
+                }
+            }
+        });
         this.add(jbtSendInvoice);
         jbtSendInvoice.setVisible(false);
         Border blackBorder = BorderFactory.createLineBorder(Color.BLACK);

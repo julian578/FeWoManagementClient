@@ -48,7 +48,8 @@ public class LoginFrame extends JFrame {
         String attachmentFilePath = "/Users/julianjacobs/Programming/Fullstack/FeWoManagement/src/main/resources/template.docx"; // Replace with the actual path of the .docx file
         String fromEmail = "julian.jacobs2611@gmail.com";
 
-        createEMLFile(fromEmail, recipientEmail, subject, body, attachmentFilePath);
+        //createEMLFile(fromEmail, recipientEmail, subject, body, attachmentFilePath);
+        //Desktop.getDesktop().open(new File("mail.eml"));
 
 
         jlbTitle.setBounds(10, 10, 100, 40);

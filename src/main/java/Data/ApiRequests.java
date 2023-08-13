@@ -90,6 +90,7 @@ public class ApiRequests {
         con.setRequestMethod("PUT");
         con.setRequestProperty("Content-Type", "application/json");
         con.setRequestProperty("Accept", "application/json");
+        con.setRequestProperty("Authorization", "Bearer "+jwt);
 
         con.setDoOutput(true);
 

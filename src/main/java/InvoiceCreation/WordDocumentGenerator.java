@@ -1,14 +1,34 @@
 package InvoiceCreation;
 
 import Data.ApiData;
+import Data.ApiRequests;
 import Data.PropertiesConfig;
+import Frames.InvoiceOverviewFrame;
+import Model.Booking;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import freemarker.template.TemplateException;
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.ContentType;
+import org.apache.http.entity.StringEntity;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClients;
+import org.apache.http.util.EntityUtils;
 import org.json.JSONException;
 
 import java.io.*;
 import java.net.URISyntaxException;
+import java.net.URL;
+import java.text.ParseException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
+import org.json.JSONObject;
+
+import javax.swing.*;
 
 public class WordDocumentGenerator {
 
@@ -17,7 +37,7 @@ public class WordDocumentGenerator {
     public static void generateInvoice(byte[] binaryData, String name, int invoiceNumber) throws IOException, JSONException, TemplateException, URISyntaxException {
         String outputFolderPath = PropertiesConfig.getInvoiceFolderPath();
         try (ByteArrayInputStream bis = new ByteArrayInputStream(binaryData);
-             FileOutputStream fos = new FileOutputStream(outputFolderPath+"Rechnung(invoice)_"+name+"_"+invoiceNumber+".docx")) {
+             FileOutputStream fos = new FileOutputStream(outputFolderPath+"/Rechnung(invoice)_"+name+"_"+invoiceNumber+".docx")) {
 
             XWPFDocument doc = new XWPFDocument(bis);
             doc.write(fos);
@@ -26,6 +46,83 @@ public class WordDocumentGenerator {
         } catch (IOException e) {
             e.printStackTrace();
         }
+
+    }
+
+
+    public static void createInvoice(String jwt, String bookingId) {
+        try(CloseableHttpClient httpClient = HttpClients.createDefault()) {
+
+            HttpPost httpPost = new HttpPost(ApiData.dotenv.get("API_REQUEST_PREFIX")+"/invoice/");
+            httpPost.addHeader("Content-Type", "application/json");
+            httpPost.addHeader("Authorization", "Bearer "+jwt);
+
+            // Set the dynamic data as the request body
+            Map<String, Object> dynamicData = new HashMap<>();
+            dynamicData.put("bookingId", bookingId);
+
+
+
+            ObjectMapper objectMapper = new ObjectMapper();
+            String jsonData = objectMapper.writeValueAsString(dynamicData);
+            StringEntity requestEntity = new StringEntity(jsonData, ContentType.APPLICATION_JSON);
+            httpPost.setEntity(requestEntity);
+
+            // Send the request and get the response
+            HttpResponse response = httpClient.execute(httpPost);
+            HttpEntity responseEntity = response.getEntity();
+
+
+
+
+            // Check if the response status is successful
+            if (response.getStatusLine().getStatusCode() == 200) {
+
+                // Convert the response entity to a byte array
+                byte[] binaryData = EntityUtils.toByteArray(responseEntity);
+
+                //get invoice number for the invoice file name
+                JSONObject invoiceRes = new JSONObject(ApiRequests.getRequest(new URL(ApiData.dotenv.get("API_REQUEST_PREFIX")+"/invoice/"+bookingId), jwt));
+
+                int invoiceNumber = (int) invoiceRes.get("invoiceId");
+
+                //get the client name for the invoice file name
+
+
+                String clientName = ApiData.clientList.get(bookingId).getFullName();
+
+                WordDocumentGenerator.generateInvoice(binaryData, clientName, invoiceNumber);
+
+
+                JOptionPane.showMessageDialog(null, "Rechnung erfolgreich erstellt");
+                ApiData.loadBookings(jwt);
+
+
+
+
+            } else {
+                System.out.println("Failed to receive the Word document. Status code: " + response.getStatusLine().getStatusCode());
+                JOptionPane.showMessageDialog(null, "Etwas ist schief gelaufen.");
+            }
+
+
+
+        } catch (JSONException ex) {
+            throw new RuntimeException(ex);
+        } catch (IOException ex) {
+            throw new RuntimeException(ex);
+        } catch (ParseException ex) {
+            throw new RuntimeException(ex);
+        } catch (InterruptedException ex) {
+            throw new RuntimeException(ex);
+        } catch (TemplateException ex) {
+            throw new RuntimeException(ex);
+        } catch (URISyntaxException ex) {
+            throw new RuntimeException(ex);
+        }
+
+
+
 
     }
 

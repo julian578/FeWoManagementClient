@@ -262,7 +262,8 @@ public class Panel extends JLabel {
                 if (arrivingIndex != -1 && leavingIndex != -1) {
 
 
-                    bl = new BookingLabel(b, 150 + arrivingIndex * 100, yPos, (leavingIndex - arrivingIndex) * 100, 50);
+                    //bl = new BookingLabel(b, 150 + arrivingIndex * 100, yPos, (leavingIndex - arrivingIndex) * 100, 50);
+                    bl = new BookingLabel(b, 154 + arrivingIndex * 100, yPos, (leavingIndex - arrivingIndex) * 100 -4, 50);
                     bl.setLabelColor(getLabelColor(b));
                     bookingLabels.add(bl);
                 }
@@ -270,14 +271,16 @@ public class Panel extends JLabel {
                 else if(arrivingIndex != -1 && leavingIndex == -1) {
 
                     endIndex = 6;
-                    bl = new BookingLabel(b, 150 + arrivingIndex * 100, yPos, (endIndex - arrivingIndex) * 100 + 50, 50);
+                    //bl = new BookingLabel(b, 150 + arrivingIndex * 100, yPos, (endIndex - arrivingIndex) * 100 + 50, 50);
+                    bl = new BookingLabel(b, 154 + arrivingIndex * 100, yPos, (endIndex - arrivingIndex) * 100 + 46, 50);
                     bl.setLabelColor(getLabelColor(b));
                     bookingLabels.add(bl);
                 }
 
                 else if(arrivingIndex == -1 && leavingIndex != -1) {
 
-                    bl = new BookingLabel(b, 100, yPos, (leavingIndex+1) * 100 - 50, 50);
+                    //bl = new BookingLabel(b, 100, yPos, (leavingIndex+1) * 100 - 50, 50);
+                    bl = new BookingLabel(b, 104, yPos, (leavingIndex+1) * 100 - 54, 50);
                     bl.setLabelColor(getLabelColor(b));
                     bookingLabels.add(bl);
                 }
@@ -295,12 +298,7 @@ public class Panel extends JLabel {
 
     private Color getLabelColor(Booking b) {
 
-        List<BookingLabel> labelsWithSameNumber = bookingLabels.stream().filter(bl -> bl.getBelegung().getFlatNumber()==b.getFlatNumber()).collect(Collectors.toList());
-        for(BookingLabel bl:labelsWithSameNumber) {
-            if(bl.getBelegung().getLeavingDate().equals(b.getArrivingDate()) || bl.getBelegung().getArrivingDate().equals(b.getLeavingDate())) {
-                return bl.getLabelColor().brighter().brighter().brighter().brighter().brighter().brighter().brighter().brighter().brighter().brighter().brighter().brighter().brighter();
-            }
-        }
+
         switch (b.getFlatNumber()) {
             case(1): return Color.BLACK;
             case(2): return Color.BLUE;
@@ -308,7 +306,7 @@ public class Panel extends JLabel {
             case(4): return Color.CYAN;
             case(5): return Color.RED;
             case(6): return Color.GRAY;
-            case(7): return Color.GREEN;
+            case(11): return Color.GREEN;
 
         }
         return Color.BLACK;
