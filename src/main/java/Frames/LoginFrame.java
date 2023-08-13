@@ -1,18 +1,26 @@
 package Frames;
 
-import Request.ApiRequests;
+import Data.ApiData;
+import Data.ApiRequests;
+import Data.PropertiesConfig;
+import com.fasterxml.jackson.databind.annotation.JsonAppend;
 import io.github.cdimascio.dotenv.Dotenv;
 import org.json.JSONException;
 import org.json.JSONObject;
+
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.text.ParseException;
+
+import static InvoiceCreation.EMLFileGenerator.createEMLFile;
 
 public class LoginFrame extends JFrame {
 
@@ -25,13 +33,23 @@ public class LoginFrame extends JFrame {
 
     private JButton jbtLogin = new JButton("Login");
 
-    public LoginFrame() {
+    public LoginFrame() throws IOException, URISyntaxException {
         this.setSize(400, 150);
         this.setLayout(null);
         this.setResizable(false);
         this.setTitle("Login");
         this.setDefaultCloseOperation(EXIT_ON_CLOSE);
         this.setLocationRelativeTo(null);
+
+        File file = new File("/Users/julianjacobs/Programming/Fullstack/FeWoManagement/src/main/resources/template.docx");
+        String recipientEmail = "lina.98522@gmail.com";
+        String subject = "Test Email with Attachment";
+        String body = "Hello, Please find the attached file.";
+        String attachmentFilePath = "/Users/julianjacobs/Programming/Fullstack/FeWoManagement/src/main/resources/template.docx"; // Replace with the actual path of the .docx file
+        String fromEmail = "julian.jacobs2611@gmail.com";
+
+        //createEMLFile(fromEmail, recipientEmail, subject, body, attachmentFilePath);
+        //Desktop.getDesktop().open(new File("mail.eml"));
 
 
         jlbTitle.setBounds(10, 10, 100, 40);
@@ -68,7 +86,9 @@ public class LoginFrame extends JFrame {
                         //new OverviewFrame(response.getString("jwt"));
                         //new NewBookingFrame(response.getString("jwt"));
 
+
                         new Dashboard(response.getString("jwt"));
+                        PropertiesConfig.loadConfig();
                         dispose();
 
 

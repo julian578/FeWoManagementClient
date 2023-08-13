@@ -1,7 +1,7 @@
 package Frames;
 
-import Request.ApiData;
-import Request.ApiRequests;
+import Data.ApiData;
+import Data.ApiRequests;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -15,7 +15,6 @@ import java.net.URL;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.Objects;
 
 public class NewBookingFrame extends JFrame {
 

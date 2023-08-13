@@ -1,26 +1,41 @@
 package Model;
 
+import Data.PropertiesConfig;
 import Frames.BookingFrame;
 import Frames.InvoiceOverviewFrame;
-import Request.ApiData;
-import Request.ApiRequests;
+import InvoiceCreation.EMLFileGenerator;
+import InvoiceCreation.WordDocumentGenerator;
+import Data.ApiData;
+import Data.ApiRequests;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import freemarker.template.TemplateException;
 import io.github.cdimascio.dotenv.Dotenv;
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.ContentType;
+import org.apache.http.entity.StringEntity;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClients;
+import org.apache.http.util.EntityUtils;
 import org.json.JSONException;
 import org.json.JSONObject;
+
 
 import javax.swing.*;
 import javax.swing.border.Border;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.File;
 import java.io.IOException;
-import java.net.MalformedURLException;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.text.DateFormat;
 import java.text.ParseException;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.Locale;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.util.*;
 
 
 public class InvoiceLabel extends JPanel {
@@ -74,19 +89,13 @@ public class InvoiceLabel extends JPanel {
         jbtInvoice.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                JSONObject body = new JSONObject();
-                try {
-                    body.put("bookingId", bookingId);
-                    ApiRequests.postRequest(new URL(ApiData.dotenv.get("API_REQUEST_PREFIX")+"/invoice/"), body.toString(), jwt);
-                    JOptionPane.showMessageDialog(null, "Rechnung erfolgreich erstellt");
 
-                    ApiData.loadBookings(jwt);
-                    frame.setBookingList((ArrayList<Booking>) ApiData.bookingList);
+                WordDocumentGenerator.createInvoice(jwt, bookingId);
+
+                frame.setBookingList((ArrayList<Booking>) ApiData.bookingList);
+                try {
                     new InvoiceOverviewFrame(jwt, frame.getBookingList());
-                    frame.dispose();
                 } catch (JSONException ex) {
-                    throw new RuntimeException(ex);
-                } catch (MalformedURLException ex) {
                     throw new RuntimeException(ex);
                 } catch (IOException ex) {
                     throw new RuntimeException(ex);
@@ -95,11 +104,77 @@ public class InvoiceLabel extends JPanel {
                 } catch (InterruptedException ex) {
                     throw new RuntimeException(ex);
                 }
-
+                frame.dispose();
             }
         });
         jbtInvoice.setVisible(false);
 
+
+        jbtSendInvoice.addActionListener(new ActionListener() {
+
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if(!client.getEmail().equals("-") && !client.getEmail().equals("")) {
+                    String recipientEmail = client.getEmail();
+                    LocalDate currentDate = LocalDate.now();
+                    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy");
+                    String formattedDate = currentDate.format(formatter);
+                    String subject = "Rechnung "+jlbBookingNumber.getText().substring(17)+ " vom "+formattedDate + " Haus Cornelia";
+                    String body = "Guten Tag, \n anbei erhalten Sie die Rechnung zu ihrer Buchung im Haus Cornelia. \nMit freundlichen Grüßen \nKornelia Heinrici";
+                    String attachmentFilePath = PropertiesConfig.getInvoiceFolderPath()+"/Rechnung(invoice)_"+client.getFullName()+"_"+jlbBookingNumber.getText().substring(17)+".docx";
+                    File attFile = new File(attachmentFilePath);
+                    if(attFile.exists()) {
+                        //REPLACE
+                        String fromEmail = "julian.jacobs2611@gmail.com";
+
+                        try {
+                            EMLFileGenerator.createEMLFile(fromEmail, recipientEmail, subject, body, attachmentFilePath);
+
+                            //update invoice status
+                            JSONObject updateBody = new JSONObject();
+                            updateBody.put("invoiceStatus", 2);
+                            System.out.println(jwt);
+                            int resCode = ApiRequests.putRequest(new URL(ApiData.dotenv.get("API_REQUEST_PREFIX") + "/booking/" + bookingId), updateBody.toString(), jwt);
+                            if (resCode == 200) {
+                                JOptionPane.showMessageDialog(null, "Rechnung erfolgreich verschickt");
+                            }
+
+                            Desktop.getDesktop().open(new File("mail.eml"));
+
+                            ApiData.loadBookings(jwt);
+                            frame.setBookingList((ArrayList<Booking>) ApiData.bookingList);
+                            try {
+                                new InvoiceOverviewFrame(jwt, frame.getBookingList());
+                            } catch (JSONException ex) {
+                                throw new RuntimeException(ex);
+                            } catch (IOException ex) {
+                                throw new RuntimeException(ex);
+                            } catch (ParseException ex) {
+                                throw new RuntimeException(ex);
+                            } catch (InterruptedException ex) {
+                                throw new RuntimeException(ex);
+                            }
+                            frame.dispose();
+                        } catch (IOException ex) {
+                            throw new RuntimeException(ex);
+                        } catch (JSONException ex) {
+                            throw new RuntimeException(ex);
+                        } catch (ParseException ex) {
+                            throw new RuntimeException(ex);
+                        } catch (InterruptedException ex) {
+                            throw new RuntimeException(ex);
+                        }
+                    } else {
+                        JOptionPane.showMessageDialog(null, "Rechnung konnte nicht gefunden werden. Email bitte manuell verschicken.");
+                    }
+
+
+
+                } else {
+                    JOptionPane.showMessageDialog(null, "Zu der Buchung ist keine Email-Adresse hinterlegt. Bitte hinzufügen");
+                }
+            }
+        });
         this.add(jbtSendInvoice);
         jbtSendInvoice.setVisible(false);
         Border blackBorder = BorderFactory.createLineBorder(Color.BLACK);
@@ -137,7 +212,7 @@ public class InvoiceLabel extends JPanel {
 
         try {
             Dotenv dotenv = Dotenv.configure().load();
-            JSONObject response = new JSONObject(ApiRequests.getRequest(new URL(dotenv.get("API_REQUEST_PREFIX")+"/invoice/"+bookingId), jwt));
+            org.json.JSONObject response = new org.json.JSONObject(ApiRequests.getRequest(new URL(dotenv.get("API_REQUEST_PREFIX")+"/invoice/"+bookingId), jwt));
 
             return response.get("invoiceId").toString();
         } catch (Exception e) {

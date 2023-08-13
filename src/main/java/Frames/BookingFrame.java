@@ -1,9 +1,10 @@
 package Frames;
 
+import InvoiceCreation.WordDocumentGenerator;
 import Model.Booking;
 import Model.Client;
-import Request.ApiData;
-import Request.ApiRequests;
+import Data.ApiData;
+import Data.ApiRequests;
 import io.github.cdimascio.dotenv.Dotenv;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -12,7 +13,6 @@ import javax.swing.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.IOException;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.text.DateFormat;
 import java.util.Locale;
@@ -62,6 +62,9 @@ public class BookingFrame extends JFrame {
 
     private JButton jbtUpdateClient = new JButton("Daten aktualisieren");
     private JButton jbtDelteBooking = new JButton("Buchung löschen");
+
+
+    private JButton jbtCreateInvoice = new JButton("Rechnung erstellen");
 
     public BookingFrame(Booking belegung,String jwt) throws JSONException, IOException {
         this.booking = belegung;
@@ -159,7 +162,7 @@ public class BookingFrame extends JFrame {
         panel.add(taxId);
         panel.add(jlbTaxId);
 
-        jbtUpdateClient.setBounds(400, 400,150, 50);
+        jbtUpdateClient.setBounds(300, 400,150, 50);
         jbtUpdateClient.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -218,6 +221,17 @@ public class BookingFrame extends JFrame {
             }
         });
         panel.add(jbtDelteBooking);
+
+
+        jbtCreateInvoice.setBounds(475, 400, 150, 50);
+        jbtCreateInvoice.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                WordDocumentGenerator.createInvoice(jwt, booking.getId());
+            }
+        });
+
+        panel.add(jbtCreateInvoice);
 
         this.add(panel);
         this.setVisible(true);

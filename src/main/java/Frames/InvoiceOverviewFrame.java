@@ -3,8 +3,8 @@ package Frames;
 import Model.Booking;
 import Model.Client;
 import Model.InvoiceLabel;
-import Request.ApiData;
-import Request.ApiRequests;
+import Data.ApiData;
+import Data.ApiRequests;
 import io.github.cdimascio.dotenv.Dotenv;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -14,14 +14,10 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.FocusEvent;
-import java.awt.event.FocusListener;
 import java.io.IOException;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.text.ParseException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 
 
@@ -70,7 +66,10 @@ public class InvoiceOverviewFrame extends JFrame {
             @Override
             public void actionPerformed(ActionEvent e) {
                 try {
-                    searchByInvoiceNumber(jtfSearchInvoiceNumber.getText());
+                    if(!jtfSearchInvoiceNumber.getText().equals("") && !jtfSearchInvoiceNumber.getText().contains(" ")) {
+                        searchByInvoiceNumber(jtfSearchInvoiceNumber.getText());
+                    }
+
                 } catch (IOException ex) {
                     throw new RuntimeException(ex);
                 } catch (JSONException ex) {

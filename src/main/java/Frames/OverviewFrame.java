@@ -1,6 +1,6 @@
 package Frames;
 
-import Request.ApiData;
+import Data.ApiData;
 import org.json.JSONException;
 
 import javax.swing.*;

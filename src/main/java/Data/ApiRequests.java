@@ -1,12 +1,7 @@
-package Request;
-
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
+package Data;
 
 import java.io.*;
 import java.net.HttpURLConnection;
-import java.net.ProtocolException;
 import java.net.URL;
 
 public class ApiRequests {
@@ -95,6 +90,7 @@ public class ApiRequests {
         con.setRequestMethod("PUT");
         con.setRequestProperty("Content-Type", "application/json");
         con.setRequestProperty("Accept", "application/json");
+        con.setRequestProperty("Authorization", "Bearer "+jwt);
 
         con.setDoOutput(true);
 
