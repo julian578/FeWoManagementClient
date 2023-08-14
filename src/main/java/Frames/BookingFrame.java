@@ -206,16 +206,25 @@ public class BookingFrame extends JFrame {
                 try {
 
                     Dotenv dotenv = Dotenv.configure().load();
-                    System.out.println(jwt);
-                    int resCode = ApiRequests.deleteRequest(new URL(dotenv.get("API_REQUEST_PREFIX")+"/booking/delete/"+belegung.getId()), jwt);
-                    if(resCode == 200) {
-                        JOptionPane.showMessageDialog(null, "Buchung erfolgreich gelöscht");
-                        dispose();
+
+                    if(ApiRequests.hasCertainRole(jwt, "ADVANCED_USER")) {
+                        int resCode = ApiRequests.deleteRequest(new URL(dotenv.get("API_REQUEST_PREFIX")+"/booking/delete/"+belegung.getId()),  jwt);
+                        if(resCode == 200) {
+                            JOptionPane.showMessageDialog(null, "Buchung erfolgreich gelöscht");
+                            dispose();
+                        }
+                        else {
+                            JOptionPane.showMessageDialog(null, "Etwas ist schief gelaufen");
+                        }
+                    } else {
+                        JOptionPane.showMessageDialog(null, "Sie haben nicht die nötigen Berechtigungen für diese Operation!");
                     }
-                    else {
-                        JOptionPane.showMessageDialog(null, "Etwas ist schief gelaufen");
-                    }
+
+
+
                 } catch (IOException ex) {
+                    throw new RuntimeException(ex);
+                } catch (JSONException ex) {
                     throw new RuntimeException(ex);
                 }
             }
@@ -227,7 +236,18 @@ public class BookingFrame extends JFrame {
         jbtCreateInvoice.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                WordDocumentGenerator.createInvoice(jwt, booking.getId());
+                try {
+                    if(ApiRequests.hasCertainRole(jwt, "ADVANCED_USER")) {
+                        WordDocumentGenerator.createInvoice(jwt, booking.getId());
+                    } else {
+                        JOptionPane.showMessageDialog(null, "Sie haben nicht die nötigen Berechtigungen für diese Operation!");
+                    }
+                } catch (IOException ex) {
+                    throw new RuntimeException(ex);
+                } catch (JSONException ex) {
+                    throw new RuntimeException(ex);
+                }
+
             }
         });
 

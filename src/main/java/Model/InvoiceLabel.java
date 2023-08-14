@@ -90,23 +90,39 @@ public class InvoiceLabel extends JPanel {
             @Override
             public void actionPerformed(ActionEvent e) {
 
-                WordDocumentGenerator.createInvoice(jwt, bookingId);
-
-                frame.setBookingList((ArrayList<Booking>) ApiData.bookingList);
                 try {
-                    new InvoiceOverviewFrame(jwt, frame.getBookingList());
-                } catch (JSONException ex) {
-                    throw new RuntimeException(ex);
+                    if (ApiRequests.hasCertainRole(jwt, "ADVANCED_USER")) {
+
+                        WordDocumentGenerator.createInvoice(jwt, bookingId);
+
+                        frame.setBookingList((ArrayList<Booking>) ApiData.bookingList);
+                        try {
+                            new InvoiceOverviewFrame(jwt, frame.getBookingList());
+                        } catch (JSONException ex) {
+                            throw new RuntimeException(ex);
+                        } catch (IOException ex) {
+                            throw new RuntimeException(ex);
+                        } catch (ParseException ex) {
+                            throw new RuntimeException(ex);
+                        } catch (InterruptedException ex) {
+                            throw new RuntimeException(ex);
+                        }
+                        frame.dispose();
+
+                    } else {
+                        JOptionPane.showMessageDialog(null, "Sie haben nicht die nötigen Berechtigungen für diese Operation!");
+                    }
+
+
                 } catch (IOException ex) {
                     throw new RuntimeException(ex);
-                } catch (ParseException ex) {
-                    throw new RuntimeException(ex);
-                } catch (InterruptedException ex) {
+                } catch (JSONException ex) {
                     throw new RuntimeException(ex);
                 }
-                frame.dispose();
             }
-        });
+            });
+
+
         jbtInvoice.setVisible(false);
 
 
@@ -114,64 +130,75 @@ public class InvoiceLabel extends JPanel {
 
             @Override
             public void actionPerformed(ActionEvent e) {
-                if(!client.getEmail().equals("-") && !client.getEmail().equals("")) {
-                    String recipientEmail = client.getEmail();
-                    LocalDate currentDate = LocalDate.now();
-                    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy");
-                    String formattedDate = currentDate.format(formatter);
-                    String subject = "Rechnung "+jlbBookingNumber.getText().substring(17)+ " vom "+formattedDate + " Haus Cornelia";
-                    String body = "Guten Tag, \n anbei erhalten Sie die Rechnung zu ihrer Buchung im Haus Cornelia. \nMit freundlichen Grüßen \nKornelia Heinrici";
-                    String attachmentFilePath = PropertiesConfig.getInvoiceFolderPath()+"/Rechnung(invoice)_"+client.getFullName()+"_"+jlbBookingNumber.getText().substring(17)+".docx";
-                    File attFile = new File(attachmentFilePath);
-                    if(attFile.exists()) {
-                        //REPLACE
-                        String fromEmail = "julian.jacobs2611@gmail.com";
 
-                        try {
-                            EMLFileGenerator.createEMLFile(fromEmail, recipientEmail, subject, body, attachmentFilePath);
+                try {
+                    if (ApiRequests.hasCertainRole(jwt, "ADVANCED_USER")) {
+                        if (!client.getEmail().equals("-") && !client.getEmail().equals("")) {
+                            String recipientEmail = client.getEmail();
+                            LocalDate currentDate = LocalDate.now();
+                            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy");
+                            String formattedDate = currentDate.format(formatter);
+                            String subject = "Rechnung " + jlbBookingNumber.getText().substring(17) + " vom " + formattedDate + " Haus Cornelia";
+                            String body = "Guten Tag, \n anbei erhalten Sie die Rechnung zu ihrer Buchung im Haus Cornelia. \nMit freundlichen Grüßen \nKornelia Heinrici";
+                            String attachmentFilePath = PropertiesConfig.getInvoiceFolderPath() + "/Rechnung(invoice)_" + client.getFullName() + "_" + jlbBookingNumber.getText().substring(17) + ".docx";
+                            File attFile = new File(attachmentFilePath);
+                            if (attFile.exists()) {
+                                //REPLACE
+                                String fromEmail = "julian.jacobs2611@gmail.com";
 
-                            //update invoice status
-                            JSONObject updateBody = new JSONObject();
-                            updateBody.put("invoiceStatus", 2);
-                            System.out.println(jwt);
-                            int resCode = ApiRequests.putRequest(new URL(ApiData.dotenv.get("API_REQUEST_PREFIX") + "/booking/" + bookingId), updateBody.toString(), jwt);
-                            if (resCode == 200) {
-                                JOptionPane.showMessageDialog(null, "Rechnung erfolgreich verschickt");
+                                try {
+                                    EMLFileGenerator.createEMLFile(fromEmail, recipientEmail, subject, body, attachmentFilePath);
+
+                                    //update invoice status
+                                    JSONObject updateBody = new JSONObject();
+                                    updateBody.put("invoiceStatus", 2);
+                                    System.out.println(jwt);
+                                    int resCode = ApiRequests.putRequest(new URL(ApiData.dotenv.get("API_REQUEST_PREFIX") + "/booking/" + bookingId), updateBody.toString(), jwt);
+                                    if (resCode == 200) {
+                                        JOptionPane.showMessageDialog(null, "Rechnung erfolgreich verschickt");
+                                    }
+
+                                    Desktop.getDesktop().open(new File("mail.eml"));
+
+                                    ApiData.loadBookings(jwt);
+                                    frame.setBookingList((ArrayList<Booking>) ApiData.bookingList);
+                                    try {
+                                        new InvoiceOverviewFrame(jwt, frame.getBookingList());
+                                    } catch (JSONException ex) {
+                                        throw new RuntimeException(ex);
+                                    } catch (IOException ex) {
+                                        throw new RuntimeException(ex);
+                                    } catch (ParseException ex) {
+                                        throw new RuntimeException(ex);
+                                    } catch (InterruptedException ex) {
+                                        throw new RuntimeException(ex);
+                                    }
+                                    frame.dispose();
+                                } catch (IOException ex) {
+                                    throw new RuntimeException(ex);
+                                } catch (JSONException ex) {
+                                    throw new RuntimeException(ex);
+                                } catch (ParseException ex) {
+                                    throw new RuntimeException(ex);
+                                } catch (InterruptedException ex) {
+                                    throw new RuntimeException(ex);
+                                }
+                            } else {
+                                JOptionPane.showMessageDialog(null, "Rechnung konnte nicht gefunden werden. Email bitte manuell verschicken.");
                             }
 
-                            Desktop.getDesktop().open(new File("mail.eml"));
 
-                            ApiData.loadBookings(jwt);
-                            frame.setBookingList((ArrayList<Booking>) ApiData.bookingList);
-                            try {
-                                new InvoiceOverviewFrame(jwt, frame.getBookingList());
-                            } catch (JSONException ex) {
-                                throw new RuntimeException(ex);
-                            } catch (IOException ex) {
-                                throw new RuntimeException(ex);
-                            } catch (ParseException ex) {
-                                throw new RuntimeException(ex);
-                            } catch (InterruptedException ex) {
-                                throw new RuntimeException(ex);
-                            }
-                            frame.dispose();
-                        } catch (IOException ex) {
-                            throw new RuntimeException(ex);
-                        } catch (JSONException ex) {
-                            throw new RuntimeException(ex);
-                        } catch (ParseException ex) {
-                            throw new RuntimeException(ex);
-                        } catch (InterruptedException ex) {
-                            throw new RuntimeException(ex);
+                        } else {
+                            JOptionPane.showMessageDialog(null, "Zu der Buchung ist keine Email-Adresse hinterlegt. Bitte hinzufügen");
                         }
+
                     } else {
-                        JOptionPane.showMessageDialog(null, "Rechnung konnte nicht gefunden werden. Email bitte manuell verschicken.");
+                        JOptionPane.showMessageDialog(null, "Sie haben nicht die nötigen Berechtigungen für diese Operation!");
                     }
-
-
-
-                } else {
-                    JOptionPane.showMessageDialog(null, "Zu der Buchung ist keine Email-Adresse hinterlegt. Bitte hinzufügen");
+                } catch (IOException ex) {
+                    throw new RuntimeException(ex);
+                } catch (JSONException ex) {
+                    throw new RuntimeException(ex);
                 }
             }
         });
@@ -212,7 +239,7 @@ public class InvoiceLabel extends JPanel {
 
         try {
             Dotenv dotenv = Dotenv.configure().load();
-            org.json.JSONObject response = new org.json.JSONObject(ApiRequests.getRequest(new URL(dotenv.get("API_REQUEST_PREFIX")+"/invoice/"+bookingId), jwt));
+            org.json.JSONObject response = new org.json.JSONObject(ApiRequests.getRequest(new URL(dotenv.get("API_REQUEST_PREFIX")+"/invoice/"+bookingId),  jwt));
 
             return response.get("invoiceId").toString();
         } catch (Exception e) {

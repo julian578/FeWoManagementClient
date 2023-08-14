@@ -82,7 +82,7 @@ public class WordDocumentGenerator {
                 byte[] binaryData = EntityUtils.toByteArray(responseEntity);
 
                 //get invoice number for the invoice file name
-                JSONObject invoiceRes = new JSONObject(ApiRequests.getRequest(new URL(ApiData.dotenv.get("API_REQUEST_PREFIX")+"/invoice/"+bookingId), jwt));
+                JSONObject invoiceRes = new JSONObject(ApiRequests.getRequest(new URL(ApiData.dotenv.get("API_REQUEST_PREFIX")+"/invoice/"+bookingId),  jwt));
 
                 int invoiceNumber = (int) invoiceRes.get("invoiceId");
 

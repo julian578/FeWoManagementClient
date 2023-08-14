@@ -1,7 +1,12 @@
 package Data;
 
+import io.github.cdimascio.dotenv.Dotenv;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.io.*;
 import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
 import java.net.URL;
 
 public class ApiRequests {
@@ -117,8 +122,12 @@ public class ApiRequests {
         HttpURLConnection con = (HttpURLConnection) url.openConnection();
         // optional default is GET
         con.setRequestMethod("GET");
+
         //add request header
         con.setRequestProperty("Authorization", "Bearer "+jwt);
+
+
+
         int responseCode = con.getResponseCode();
 
         BufferedReader in = new BufferedReader(
@@ -131,4 +140,18 @@ public class ApiRequests {
         in.close();
         return response.toString();
     }
+
+    public static boolean hasCertainRole(String jwt, String role) throws IOException, JSONException {
+        Dotenv dotenv = Dotenv.configure().load();
+
+
+        JSONObject checkRole = new JSONObject(ApiRequests.getRequest(new URL(dotenv.get("API_REQUEST_PREFIX")+"/user/hasRole/"+role),  jwt));
+
+
+        return (boolean) checkRole.get("hasRole");
+
+    }
+
+
+
 }

@@ -1,5 +1,6 @@
 package Frames;
 
+import Data.ApiRequests;
 import Model.Booking;
 import Model.Client;
 import Data.ApiData;
@@ -22,6 +23,7 @@ public class Dashboard extends JFrame {
     private JButton jbtBookingOverview = new JButton("Kalenderansicht der Buchungen");
     private JButton jbtInvoiceOverview = new JButton("Rechnungen verwalten");
 
+    private JButton jbtPricing = new JButton("Preisgestaltung");
     private JButton jbtSettings = new JButton("Einstellungen");
 
     private ArrayList<Booking> bookingList = new ArrayList<>();
@@ -57,7 +59,7 @@ public class Dashboard extends JFrame {
         });
         this.add(jbtBookingOverview);
 
-        jbtInvoiceOverview.setBounds(10, 200, 400, 80);
+        jbtInvoiceOverview.setBounds(10, 110, 400, 80);
         jbtInvoiceOverview.setFont(new Font("Arial", Font.PLAIN, 25));
         jbtInvoiceOverview.addActionListener(new ActionListener() {
             @Override
@@ -78,12 +80,43 @@ public class Dashboard extends JFrame {
         });
         this.add(jbtInvoiceOverview);
 
-        jbtSettings.setBounds(10, 300, 400, 80);
+
+        //jbtpricing
+        jbtPricing.setBounds(10, 210, 400, 80);
+        jbtPricing.setFont(new Font("Arial", Font.PLAIN, 25));
+        jbtPricing.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                try {
+                    new PricingFrame(jwt);
+                } catch (JSONException ex) {
+                    throw new RuntimeException(ex);
+                } catch (IOException ex) {
+                    throw new RuntimeException(ex);
+                }
+            }
+        });
+        this.add(jbtPricing);
+
+
+        jbtSettings.setBounds(10, 310, 400, 80);
         jbtSettings.setFont(new Font("Arial", Font.PLAIN, 25));
         jbtSettings.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                new SettingsFrame(jwt);
+
+                try {
+                    if(ApiRequests.hasCertainRole(jwt, "ADMIN")) {
+                        new SettingsFrame(jwt);
+                    } else {
+                        JOptionPane.showMessageDialog(null, "Sie haben nicht die nötigen Berechtigungen für diese Operation!");
+                    }
+                } catch (IOException ex) {
+                    throw new RuntimeException(ex);
+                } catch (JSONException ex) {
+                    throw new RuntimeException(ex);
+                }
+
             }
         });
 

@@ -163,7 +163,7 @@ public class InvoiceOverviewFrame extends JFrame {
     private void searchByInvoiceNumber(String invoiceNumber) throws IOException, JSONException, ParseException, InterruptedException {
         Dotenv dotenv = Dotenv.configure().load();
 
-        JSONArray bookings = new JSONArray(ApiRequests.getRequest(new URL(dotenv.get("API_REQUEST_PREFIX")+"/booking/invoice/"+invoiceNumber), jwt).toString());
+        JSONArray bookings = new JSONArray(ApiRequests.getRequest(new URL(dotenv.get("API_REQUEST_PREFIX")+"/booking/invoice/"+invoiceNumber),  jwt).toString());
 
         new InvoiceOverviewFrame(jwt,ApiData.jsonArrayToBookingList(bookings));
         this.dispose();

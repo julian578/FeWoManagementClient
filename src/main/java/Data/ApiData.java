@@ -25,7 +25,7 @@ public class ApiData {
 
 
     public static void loadBookings(String jwt) throws JSONException, IOException, ParseException, InterruptedException {
-        JSONArray bookings = new JSONArray(ApiRequests.getRequest(new URL(dotenv.get("API_REQUEST_PREFIX")+"/booking/all"), jwt).toString());
+        JSONArray bookings = new JSONArray(ApiRequests.getRequest(new URL(dotenv.get("API_REQUEST_PREFIX")+"/booking/all"),  jwt).toString());
 
         bookingList.clear();
 
@@ -39,7 +39,7 @@ public class ApiData {
         clientList.clear();
 
         for(Booking b : bookingList) {
-            JSONObject client = new JSONObject(ApiRequests.getRequest(new URL(dotenv.get("API_REQUEST_PREFIX")+"/booking/client/"+b.getClientId()), jwt).toString());
+            JSONObject client = new JSONObject(ApiRequests.getRequest(new URL(dotenv.get("API_REQUEST_PREFIX")+"/booking/client/"+b.getClientId()),  jwt).toString());
             Client c = new Client(
                     (String)client.get("_id"),
                     (String)client.get("fullName"),
@@ -93,5 +93,6 @@ public class ApiData {
 
         return null;
     }
+
 
 }
