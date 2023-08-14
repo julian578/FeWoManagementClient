@@ -127,6 +127,8 @@ public class PricingFrame extends JFrame {
                             throw new RuntimeException(ex);
                         } catch (JSONException ex) {
                             throw new RuntimeException(ex);
+                        } catch(NumberFormatException ex) {
+                            JOptionPane.showMessageDialog(null, "Einer der Preise ist keine Zahl!");
                         }
 
                     } else {
