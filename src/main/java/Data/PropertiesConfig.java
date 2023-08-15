@@ -5,7 +5,7 @@ import java.util.Properties;
 
 public class PropertiesConfig {
 
-    private static final String CONFIG_FILE = "config.properties";
+    private static final String CONFIG_FILE = "/config.properties";
     private static Properties properties = new Properties();
 
 
@@ -20,7 +20,7 @@ public class PropertiesConfig {
     }
 
     public static void saveConfig() {
-        try (OutputStream output = new FileOutputStream(CONFIG_FILE)) {
+        try (OutputStream output = PropertiesConfig.class.getClassLoader().getResource(CONFIG_FILE).openConnection().getOutputStream()) {
             properties.store(output, null);
         } catch (IOException e) {
             e.printStackTrace();
