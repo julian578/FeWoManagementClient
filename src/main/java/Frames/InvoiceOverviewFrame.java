@@ -66,7 +66,7 @@ public class InvoiceOverviewFrame extends JFrame {
             @Override
             public void actionPerformed(ActionEvent e) {
                 try {
-                    if(!jtfSearchInvoiceNumber.getText().equals("") && !jtfSearchInvoiceNumber.getText().contains(" ")) {
+                    if(!jtfSearchInvoiceNumber.getText().isEmpty() && !jtfSearchInvoiceNumber.getText().contains(" ")) {
                         searchByInvoiceNumber(jtfSearchInvoiceNumber.getText());
                     }
 
@@ -87,7 +87,10 @@ public class InvoiceOverviewFrame extends JFrame {
             @Override
             public void actionPerformed(ActionEvent e) {
                 try {
-                    searchByName(jtfSearchName.getText());
+                    if(!jtfSearchName.getText().isEmpty()) {
+                        searchByName(jtfSearchName.getText());
+                    }
+
                 } catch (IOException ex) {
                     throw new RuntimeException(ex);
                 } catch (JSONException ex) {

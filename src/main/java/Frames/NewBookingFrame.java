@@ -286,6 +286,15 @@ public class NewBookingFrame extends JFrame {
                     mistake = true;
                 }
 
+                if(validateStringField(jtfDiscount)) {
+                    try {
+                        Double.parseDouble(jtfDiscount.getText());
+                    } catch(NumberFormatException ex) {
+                        jlbDiscount.setForeground(Color.RED);
+                        mistake = true;
+                    }
+
+                }
 
 
                 if(!mistake) {
@@ -350,6 +359,12 @@ public class NewBookingFrame extends JFrame {
                                 String listOfNames = jtfNameOfBookingPerson.getText() + ", "+jtfListOfNames.getText();
                                 bookingBody.put("listOfNames", listOfNames);
                             } else bookingBody.put("listOfNames", "-");
+
+                            if(validateStringField(jtfDiscount)) {
+
+                                bookingBody.put("discount", jtfDiscount.getText());
+                            }
+
                             ApiRequests.postRequest(new URL(ApiData.dotenv.get("API_REQUEST_PREFIX")+"/booking/create"), bookingBody.toString(), jwt);
 
                             JOptionPane.showMessageDialog(null, "Neue Buchung erfolgreich erstellt");
