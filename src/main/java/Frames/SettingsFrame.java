@@ -246,6 +246,9 @@ public class SettingsFrame extends JFrame {
 
                         if(resCode == 200) {
                             JOptionPane.showMessageDialog(null, "Rechte erfolgreich hinzugefügt. !");
+                            jtfUpdateName.setText("");
+                            jcbUpdateAdminRoles.setSelected(false);
+                            jcbUpdateAdminRoles.setSelected(false);
                         } else if(resCode == 404) {
                             JOptionPane.showMessageDialog(null, "Benutzer wurde nicht gefunden!");
                         } else {

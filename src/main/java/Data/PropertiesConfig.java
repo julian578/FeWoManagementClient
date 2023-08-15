@@ -5,12 +5,12 @@ import java.util.Properties;
 
 public class PropertiesConfig {
 
-    private static final String CONFIG_FILE = "config.properties";
+    private static final String CONFIG_FILE = "/config.properties";
     private static Properties properties = new Properties();
 
 
     public static void loadConfig() {
-        try (InputStream input = new FileInputStream(CONFIG_FILE)) {
+        try (InputStream input = PropertiesConfig.class.getResourceAsStream(CONFIG_FILE)) {
             properties.load(input);
 
             properties.getProperty("invoiceFolderPath");
@@ -20,7 +20,7 @@ public class PropertiesConfig {
     }
 
     public static void saveConfig() {
-        try (OutputStream output = new FileOutputStream(CONFIG_FILE)) {
+        try (OutputStream output = PropertiesConfig.class.getClassLoader().getResource(CONFIG_FILE).openConnection().getOutputStream()) {
             properties.store(output, null);
         } catch (IOException e) {
             e.printStackTrace();
@@ -37,14 +37,7 @@ public class PropertiesConfig {
     }
 
 
-    public static String getTemplateFolderPath() {
-        return properties.getProperty("templateFolderPath");
-    }
 
-    public static void setTemplateFolderPath(String templateFolderPath) {
-        properties.setProperty("templateFolderPath", templateFolderPath);
-        saveConfig();
-    }
 
 
 

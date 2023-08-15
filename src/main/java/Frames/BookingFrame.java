@@ -171,7 +171,7 @@ public class BookingFrame extends JFrame {
                 try {
                     Dotenv dotenv = Dotenv.configure().load();
 
-                    System.out.println(jwt);
+
                     validateUpdateInputs();
                     JSONObject body = new JSONObject();
                     body.put("fullName", nameOfBookingPerson.getText());

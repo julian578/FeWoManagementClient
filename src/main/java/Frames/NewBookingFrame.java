@@ -421,8 +421,7 @@ public class NewBookingFrame extends JFrame {
     private boolean arrivalDateIsBeforeLeavingDate(String arrStr, String leavStr) {
         String format = "dd-MM-yyyy";
         SimpleDateFormat sdf = new SimpleDateFormat(format);
-        System.out.println(arrStr);
-        System.out.println(leavStr);
+
         try {
             Date arrivalDate = sdf.parse(arrStr);
             Date leavingDate = sdf.parse(leavStr);

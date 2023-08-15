@@ -47,7 +47,7 @@ public class EMLFileGenerator {
             // End of the MIME content
             outputStream.write("--separator--\r\n".getBytes());
 
-            System.out.println("EML file with attachment created successfully: " + emlFilePath);
+
         } catch (IOException e) {
             e.printStackTrace();
         }

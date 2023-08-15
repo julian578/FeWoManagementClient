@@ -42,7 +42,7 @@ public class WordDocumentGenerator {
             XWPFDocument doc = new XWPFDocument(bis);
             doc.write(fos);
             File outputFile = new File("Rechnung(invoice)_"+name+"_"+invoiceNumber+".docx");
-            System.out.println("Word document recreated and saved successfully.");
+
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -101,7 +101,7 @@ public class WordDocumentGenerator {
 
 
             } else {
-                System.out.println("Failed to receive the Word document. Status code: " + response.getStatusLine().getStatusCode());
+
                 JOptionPane.showMessageDialog(null, "Etwas ist schief gelaufen.");
             }
 

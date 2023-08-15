@@ -152,7 +152,7 @@ public class InvoiceLabel extends JPanel {
                                     //update invoice status
                                     JSONObject updateBody = new JSONObject();
                                     updateBody.put("invoiceStatus", 2);
-                                    System.out.println(jwt);
+
                                     int resCode = ApiRequests.putRequest(new URL(ApiData.dotenv.get("API_REQUEST_PREFIX") + "/booking/" + bookingId), updateBody.toString(), jwt);
                                     if (resCode == 200) {
                                         JOptionPane.showMessageDialog(null, "Rechnung erfolgreich verschickt");
