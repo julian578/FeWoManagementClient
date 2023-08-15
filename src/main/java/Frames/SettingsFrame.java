@@ -227,6 +227,45 @@ public class SettingsFrame extends JFrame {
         jpUpdateUserRoles.add(jtfUpdateName);
         jpUpdateUserRoles.add(jcbUpdateAdvancedUserRoles);
         jpUpdateUserRoles.add(jcbUpdateAdminRoles);
+
+        jbtSubmitUpdate.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if(jcbUpdateAdminRoles.isSelected() || jcbUpdateAdvancedUserRoles.isSelected() && !jtfUpdateName.getText().isEmpty()) {
+
+                    try {
+                        JSONObject body = new JSONObject();
+                        body.put("name", jtfUpdateName.getText());
+                        String roles[];
+                        if(jcbUpdateAdminRoles.isSelected()) roles = new String[]{"ADMIN", "ADVANCED_USER"};
+                        else roles = new String[]{"ADVANCED_USER"};
+                        body.put("new_roles", roles);
+
+                        int resCode = ApiRequests.putRequest(new URL(ApiData.dotenv.get("API_REQUEST_PREFIX")+"/user/addRole"), body.toString(), jwt);
+
+
+                        if(resCode == 200) {
+                            JOptionPane.showMessageDialog(null, "Rechte erfolgreich hinzugefügt. !");
+                        } else if(resCode == 404) {
+                            JOptionPane.showMessageDialog(null, "Benutzer wurde nicht gefunden!");
+                        } else {
+                            JOptionPane.showMessageDialog(null, "Etwas ist schief gelaufen!");
+                        }
+
+                    } catch (JSONException ex) {
+                        JOptionPane.showMessageDialog(null, "Etwas ist schief gelaufen!");
+                        throw new RuntimeException(ex);
+                    } catch (MalformedURLException ex) {
+                        JOptionPane.showMessageDialog(null, "Etwas ist schief gelaufen!");
+                        throw new RuntimeException(ex);
+                    } catch (IOException ex) {
+                        JOptionPane.showMessageDialog(null, "Etwas ist schief gelaufen!");
+                        throw new RuntimeException(ex);
+                    }
+
+                }
+            }
+        });
         jpUpdateUserRoles.add(jbtSubmitUpdate);
 
 

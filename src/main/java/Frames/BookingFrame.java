@@ -1,5 +1,6 @@
 package Frames;
 
+import Data.PropertiesConfig;
 import InvoiceCreation.WordDocumentGenerator;
 import Model.Booking;
 import Model.Client;
@@ -12,6 +13,7 @@ import org.json.JSONObject;
 import javax.swing.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.text.DateFormat;
@@ -208,6 +210,14 @@ public class BookingFrame extends JFrame {
                     Dotenv dotenv = Dotenv.configure().load();
 
                     if(ApiRequests.hasCertainRole(jwt, "ADVANCED_USER")) {
+
+                        if(belegung.getInvoiceStatus() != 0) {
+                            JSONObject invoiceRes = new JSONObject(ApiRequests.getRequest(new URL(ApiData.dotenv.get("API_REQUEST_PREFIX")+"/invoice/"+belegung.getId()), jwt));
+                            if(invoiceRes.has("invoiceId")) {
+                                deleteInvoiceFile("Rechnung(invoice)_"+client.getFullName()+"_"+invoiceRes.get("invoiceId")+".docx");
+                            }
+
+                        }
                         int resCode = ApiRequests.deleteRequest(new URL(dotenv.get("API_REQUEST_PREFIX")+"/booking/delete/"+belegung.getId()),  jwt);
                         if(resCode == 200) {
                             JOptionPane.showMessageDialog(null, "Buchung erfolgreich gelöscht");
@@ -271,4 +281,11 @@ public class BookingFrame extends JFrame {
         if(taxId.getText().equals("")) taxId.setText("-");
     }
 
+    private void deleteInvoiceFile(String fileName) {
+
+        File invoiceFile = new File(PropertiesConfig.getInvoiceFolderPath()+"/"+fileName);
+        if(invoiceFile.exists()) {
+            invoiceFile.delete();
+        }
+    }
 }

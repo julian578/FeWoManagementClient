@@ -104,15 +104,16 @@ public class ApiRequests {
             os.write(input, 0, input.length);
         }
 
-        try(BufferedReader br = new BufferedReader(
-                new InputStreamReader(con.getInputStream(), "utf-8"))) {
-            StringBuilder response = new StringBuilder();
-            String responseLine = null;
-            while ((responseLine = br.readLine()) != null) {
-                response.append(responseLine.trim());
-            }
-            return con.getResponseCode();
-        }
+        //try(BufferedReader br = new BufferedReader(
+              //  new InputStreamReader(con.getInputStream(), "utf-8"))) {
+            //StringBuilder response = new StringBuilder();
+            //String responseLine = null;
+            //while ((responseLine = br.readLine()) != null) {
+           //     response.append(responseLine.trim());
+         //   }
+            //return con.getResponseCode();
+       //}
+        return con.getResponseCode();
 
     }
 
