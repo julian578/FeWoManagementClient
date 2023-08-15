@@ -25,7 +25,6 @@
       <element id="extracted-dir" path="$MAVEN_REPOSITORY$/com/fasterxml/jackson/core/jackson-core/2.12.5/jackson-core-2.12.5.jar" path-in-jar="/" />
       <element id="extracted-dir" path="$MAVEN_REPOSITORY$/org/hamcrest/hamcrest-core/1.1/hamcrest-core-1.1.jar" path-in-jar="/" />
       <element id="file-copy" path="$PROJECT_DIR$/.env" />
-      <element id="file-copy" path="$PROJECT_DIR$/config.properties" />
     </root>
   </artifact>
 </component>

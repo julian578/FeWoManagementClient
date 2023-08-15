@@ -1,6 +1,5 @@
 package Frames;
 
-import Data.PropertiesConfig;
 import InvoiceCreation.WordDocumentGenerator;
 import Model.Booking;
 import Model.Client;
@@ -283,7 +282,9 @@ public class BookingFrame extends JFrame {
 
     private void deleteInvoiceFile(String fileName) {
 
-        File invoiceFile = new File(PropertiesConfig.getInvoiceFolderPath()+"/"+fileName);
+
+
+        File invoiceFile = new File(ApiData.getInvoiceFilePath(jwt)+"/"+fileName);
         if(invoiceFile.exists()) {
             invoiceFile.delete();
         }

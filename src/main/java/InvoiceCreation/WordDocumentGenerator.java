@@ -2,7 +2,7 @@ package InvoiceCreation;
 
 import Data.ApiData;
 import Data.ApiRequests;
-import Data.PropertiesConfig;
+
 import Frames.InvoiceOverviewFrame;
 import Model.Booking;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -34,18 +34,25 @@ public class WordDocumentGenerator {
 
 
 
-    public static void generateInvoice(byte[] binaryData, String name, int invoiceNumber) throws IOException, JSONException, TemplateException, URISyntaxException {
-        String outputFolderPath = PropertiesConfig.getInvoiceFolderPath();
-        try (ByteArrayInputStream bis = new ByteArrayInputStream(binaryData);
-             FileOutputStream fos = new FileOutputStream(outputFolderPath+"/Rechnung(invoice)_"+name+"_"+invoiceNumber+".docx")) {
+    public static void generateInvoice(byte[] binaryData, String name, int invoiceNumber, String jwt) throws IOException, JSONException, TemplateException, URISyntaxException {
+        //String outputFolderPath = PropertiesConfig.getInvoiceFolderPath();
+        JSONObject invoicePathRes = new JSONObject(ApiRequests.getRequest(new URL(ApiData.dotenv.get("API_REQUEST_PREFIX")+"/filePath/INVOICE_PATH"), jwt).toString());
 
-            XWPFDocument doc = new XWPFDocument(bis);
-            doc.write(fos);
-            File outputFile = new File("Rechnung(invoice)_"+name+"_"+invoiceNumber+".docx");
+        if(invoicePathRes.has("path")) {
+            String outputFolderPath = invoicePathRes.get("path").toString();
+            try (ByteArrayInputStream bis = new ByteArrayInputStream(binaryData);
+                 FileOutputStream fos = new FileOutputStream(outputFolderPath+"/Rechnung(invoice)_"+name+"_"+invoiceNumber+".docx")) {
 
-        } catch (IOException e) {
-            e.printStackTrace();
+                XWPFDocument doc = new XWPFDocument(bis);
+                doc.write(fos);
+                File outputFile = new File("Rechnung(invoice)_"+name+"_"+invoiceNumber+".docx");
+
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
+
+
 
     }
 
@@ -91,7 +98,7 @@ public class WordDocumentGenerator {
 
                 String clientName = ApiData.clientList.get(bookingId).getFullName();
 
-                WordDocumentGenerator.generateInvoice(binaryData, clientName, invoiceNumber);
+                WordDocumentGenerator.generateInvoice(binaryData, clientName, invoiceNumber, jwt);
 
 
                 JOptionPane.showMessageDialog(null, "Rechnung erfolgreich erstellt");

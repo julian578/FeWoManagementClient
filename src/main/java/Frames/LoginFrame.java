@@ -2,7 +2,6 @@ package Frames;
 
 import Data.ApiData;
 import Data.ApiRequests;
-import Data.PropertiesConfig;
 import com.fasterxml.jackson.databind.annotation.JsonAppend;
 import io.github.cdimascio.dotenv.Dotenv;
 import org.json.JSONException;
@@ -88,7 +87,7 @@ public class LoginFrame extends JFrame {
 
 
                         new Dashboard(response.getString("jwt"));
-                        PropertiesConfig.loadConfig();
+
                         dispose();
 
 

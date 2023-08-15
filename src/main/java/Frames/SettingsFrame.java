@@ -2,7 +2,6 @@ package Frames;
 
 import Data.ApiData;
 import Data.ApiRequests;
-import Data.PropertiesConfig;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -26,7 +25,7 @@ public class SettingsFrame extends JFrame {
     private JPanel jpRight = new JPanel();
 
     private JLabel jlbInvoiceFilePath = new JLabel("Ordner für Rechnungen:");
-    private JTextField jtfSelectedInvoiceFolder = new JTextField(PropertiesConfig.getInvoiceFolderPath(), 40);
+    private JTextField jtfSelectedInvoiceFolder = new JTextField(40);
     private JButton chooseInvoiceFolder = new JButton("Ordner wählen");
 
     private JLabel jlbHeadlineCreateNewUser = new JLabel("Neuen Benutzer erstellen");
@@ -84,15 +83,37 @@ public class SettingsFrame extends JFrame {
                 if (result == JFileChooser.APPROVE_OPTION) {
                     String selectedFolderPath = fileChooser.getSelectedFile().getAbsolutePath();
 
-                    PropertiesConfig.setInvoiceFolderPath(selectedFolderPath);
+                    JSONObject body = new JSONObject();
+                    try {
+                        body.put("subject", "INVOICE_PATH");
+                        body.put("path", selectedFolderPath);
 
-                    jtfSelectedInvoiceFolder.setText(selectedFolderPath);
+                        int resCode = ApiRequests.postRequestReturningStatusCode(new URL(ApiData.dotenv.get("API_REQUEST_PREFIX")+"/filePath/setPath"), body.toString(), jwt);
+                        if(resCode == 200) {
+                            jtfSelectedInvoiceFolder.setText(selectedFolderPath);
+                            JOptionPane.showMessageDialog(null, "Pfad erfolgreich geändert!");
+                        } else {
+                            JOptionPane.showMessageDialog(null, "Etwas ist schief gelaufen!");
+                        }
+                    } catch (JSONException ex) {
+                        throw new RuntimeException(ex);
+                    } catch (MalformedURLException ex) {
+                        throw new RuntimeException(ex);
+                    } catch (IOException ex) {
+                        throw new RuntimeException(ex);
+                    }
+
+
+
+
                 }
             }
         });
 
         jpLeft.add(jlbInvoiceFilePath);
         jpLeft.add(chooseInvoiceFolder);
+
+        setFilePath(jwt);
         jpRight.add(jtfSelectedInvoiceFolder);
 
         jpLeft.add(Box.createVerticalStrut(20));
@@ -283,4 +304,9 @@ public class SettingsFrame extends JFrame {
 
     }
 
+    private void setFilePath(String jwt)  {
+        jtfSelectedInvoiceFolder.setText(ApiData.getInvoiceFilePath(jwt));
+
+
+    }
 }

@@ -1,6 +1,6 @@
 package Model;
 
-import Data.PropertiesConfig;
+
 import Frames.BookingFrame;
 import Frames.InvoiceOverviewFrame;
 import InvoiceCreation.EMLFileGenerator;
@@ -140,7 +140,7 @@ public class InvoiceLabel extends JPanel {
                             String formattedDate = currentDate.format(formatter);
                             String subject = "Rechnung " + jlbBookingNumber.getText().substring(17) + " vom " + formattedDate + " Haus Cornelia";
                             String body = "Guten Tag, \n anbei erhalten Sie die Rechnung zu ihrer Buchung im Haus Cornelia. \nMit freundlichen Grüßen \nKornelia Heinrici";
-                            String attachmentFilePath = PropertiesConfig.getInvoiceFolderPath() + "/Rechnung(invoice)_" + client.getFullName() + "_" + jlbBookingNumber.getText().substring(17) + ".docx";
+                            String attachmentFilePath = ApiData.getInvoiceFilePath(jwt) + "/Rechnung(invoice)_" + client.getFullName() + "_" + jlbBookingNumber.getText().substring(17) + ".docx";
                             File attFile = new File(attachmentFilePath);
                             if (attFile.exists()) {
                                 //REPLACE

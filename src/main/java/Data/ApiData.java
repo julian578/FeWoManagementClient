@@ -8,7 +8,9 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import javax.swing.*;
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -95,4 +97,22 @@ public class ApiData {
     }
 
 
+    public static String getInvoiceFilePath(String jwt) {
+        try {
+            JSONObject invoicePathRes = new JSONObject(ApiRequests.getRequest(new URL(ApiData.dotenv.get("API_REQUEST_PREFIX")+"/filePath/INVOICE_PATH"), jwt).toString());
+            if(invoicePathRes.has("path")) {
+                return invoicePathRes.get("path").toString();
+            } else {
+                JOptionPane.showMessageDialog(null, "Pfad für Rechnungen konnte nicht geladen werden!");
+            }
+        } catch (MalformedURLException e) {
+            throw new RuntimeException(e);
+        } catch (JSONException e) {
+            throw new RuntimeException(e);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+        return "";
+    }
 }
