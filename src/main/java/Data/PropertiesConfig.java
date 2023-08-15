@@ -10,7 +10,7 @@ public class PropertiesConfig {
 
 
     public static void loadConfig() {
-        try (InputStream input = new FileInputStream(CONFIG_FILE)) {
+        try (InputStream input = PropertiesConfig.class.getResourceAsStream(CONFIG_FILE)) {
             properties.load(input);
 
             properties.getProperty("invoiceFolderPath");
