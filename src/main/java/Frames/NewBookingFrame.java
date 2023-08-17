@@ -281,9 +281,28 @@ public class NewBookingFrame extends JFrame {
                     mistake = true;
                 }
                 if(!arrivalDateIsBeforeLeavingDate(jtfArrival.getText(), jtfLeaving.getText())) {
+
                     jblArrival.setForeground(Color.RED);
                     jblLeaving.setForeground(Color.RED);
                     mistake = true;
+                }
+
+                SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy");
+                try {
+                    sdf.parse(jtfArrival.getText());
+
+                } catch (ParseException ex) {
+                    jblArrival.setForeground(Color.RED);
+                    mistake = true;
+
+                }
+                try {
+                    sdf.parse(jtfLeaving.getText());
+
+                } catch (ParseException ex) {
+                    jblLeaving.setForeground(Color.RED);
+                    mistake = true;
+
                 }
 
                 if(validateStringField(jtfDiscount)) {
