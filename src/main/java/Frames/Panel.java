@@ -27,7 +27,7 @@ public class Panel extends JLabel {
     private int scrollStatus = 0;
     private String[] headerDates = new String[7];
     Locale loc = new Locale("de", "DE");
-    DateFormat dateFormat = DateFormat.getDateInstance(DateFormat.DEFAULT, loc);
+    SimpleDateFormat dateFormat = new SimpleDateFormat("dd.MM.yyyy");
     Date dt;
     Calendar c = Calendar.getInstance();
 
@@ -53,7 +53,7 @@ public class Panel extends JLabel {
         setLeavingsToday();
         this.setLayout(null);
         this.setBounds(0, 0, 800, 600);
-        scrollLeft.setBounds(700, 500, 30, 30);
+        scrollLeft.setBounds(680, 500, 50, 40);
         scrollLeft.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -68,7 +68,7 @@ public class Panel extends JLabel {
         });
         this.add(scrollLeft);
 
-        scrollRight.setBounds(735, 500, 30, 30);
+        scrollRight.setBounds(735, 500, 50, 40);
         scrollRight.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -96,7 +96,7 @@ public class Panel extends JLabel {
             }
         });
 
-        addBookingButton.setBounds(620, 410, 150, 50);
+        addBookingButton.setBounds(600, 410, 170, 50);
         addBookingButton.setVisible(true);
         addBookingButton.addActionListener(new ActionListener() {
             @Override
@@ -145,10 +145,12 @@ public class Panel extends JLabel {
 
 
     private void setArrivingsToday() {
+
         jtaArrivalsToday.setText("Anreisen heute:");
-        for(Booking b:belegungen) {
+        for(Booking b:ApiData.bookingList) {
 
             if( dateFormat.format(b.getArrivingDate()).equals(dateFormat.format(new Date()))) {
+
 
                 jtaArrivalsToday.append("\n- Wohnung "+ (char)(64+b.getFlatNumber()));
             }
@@ -157,7 +159,7 @@ public class Panel extends JLabel {
 
     private void setLeavingsToday() {
         jtaLeavingsToday.setText("Abreisen heute:");
-        for(Booking b:belegungen) {
+        for(Booking b:ApiData.bookingList) {
             if(dateFormat.format(b.getLeavingDate()).equals(dateFormat.format(new Date()))) {
                 jtaLeavingsToday.append("\n- Wohnung "+ (char)(64+b.getFlatNumber()));
             }
